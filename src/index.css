@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Outfit', sans-serif;
+  }
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom Scrollbar for Command Center */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1322;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2d47;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Dark Mode Map Tiles Styling */
+.dark-map .leaflet-tile-layer {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+.dark-map .leaflet-container {
+  background-color: #0b111e !important;
+}
+
+/* Glowing Pulsing Markers for Map */
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+.marker-ping-critical {
+  animation: ping-slow 1.5s infinite ease-in-out;
+  background-color: rgba(239, 68, 68, 0.4);
+}
+
+.marker-ping-high {
+  animation: ping-slow 2s infinite ease-in-out;
+  background-color: rgba(249, 115, 22, 0.4);
+}
+
+/* Leaflet Popup customization */
+.leaflet-popup-content-wrapper {
+  background: #151e32 !important;
+  color: #f3f4f6 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8) !important;
+  padding: 4px !important;
+}
+.leaflet-popup-tip {
+  background: #151e32 !important;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: #9ca3af !important;
+  padding: 6px 8px 0 0 !important;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-accent {
+  background: rgba(21, 30, 50, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
