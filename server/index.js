@@ -2,8 +2,13 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
+import { connectDB } from './config/db.js';
 import apiRouter from './routes/api.js';
 import routeOptimizationRouter from './routes/routeOptimization.js';
+import authRouter from './routes/auth.js';
+
+// Connect to MongoDB Database (with seamless fallback)
+connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -66,7 +71,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Register API and Route Optimization Routers
+// Register API, Auth, and Route Optimization Routers
+app.use('/api/auth', authRouter);
 app.use('/api', apiRouter);
 app.use('/api/routes', routeOptimizationRouter);
 

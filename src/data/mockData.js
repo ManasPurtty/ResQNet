@@ -1063,24 +1063,6 @@ export const INITIAL_ALERTS = [
     ]
   }
 ];
-  {
-    id: "ALERT-OD-902",
-    title: "DAYA & KUSHABHADRA RIVER FLASH FLOOD SPILL ALERT",
-    source: "Odisha Water Resources Department (CE Basin Management)",
-    severity: "SEVERE",
-    affectedRegion: "Bhubaneswar Southern Margins, Pipili, Balianta & Nimapada",
-    issuedAt: "09:15 AM Today",
-    validUntil: "08:00 PM Today",
-    details: "Mahanadi Naraj barrage discharge exceeded 7.5 lakh cusecs. Daya and Kushabhadra distributaries overflowing banks. Lowland roads closed. Pre-position rescue boats immediately.",
-    coordinates: [
-      [20.3100, 85.8300],
-      [20.3000, 85.8900],
-      [20.1500, 85.9200],
-      [20.0800, 85.8200],
-      [20.2200, 85.8000]
-    ]
-  }
-];
 
 export const SMS_IVR_REPORTS = [
   {
