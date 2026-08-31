@@ -690,13 +690,13 @@ export const ODISHA_SUPPLY_CENTERS = [
 export const ODISHA_ALERTS = [
   {
     id: "ALERT-OD-901",
-    title: "CYCLONIC STORM 'DANA' — RED WARNING FOR ODISHA COAST",
+    title: "SEVERE CYCLONIC DEPRESSION — RED WARNING FOR ODISHA COAST",
     source: "IMD & OSDMA",
     severity: "EXTREME",
     affectedRegion: "Puri, Jagatsinghpur, Kendrapara, Khordha, Cuttack & Balasore",
     issuedAt: "06:30 AM Today",
     validUntil: "11:59 PM Tomorrow",
-    details: "Severe Cyclonic Storm over Bay of Bengal moving NW at 18 km/h.",
+    details: "Severe Cyclonic storm depression over Bay of Bengal moving NW at 18 km/h.",
     coordinates: [
       [20.3500, 85.7000],
       [20.5500, 85.9500],

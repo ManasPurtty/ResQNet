@@ -1030,13 +1030,13 @@ export const INITIAL_SUPPLY_CENTERS = [
 export const INITIAL_ALERTS = [
   {
     id: "ALERT-OD-901",
-    title: "CYCLONIC STORM 'DANA' — RED WARNING FOR ODISHA COAST",
+    title: "SEVERE CYCLONIC DEPRESSION — RED WARNING FOR ODISHA COAST",
     source: "IMD (India Meteorological Department) & OSDMA",
     severity: "EXTREME",
     affectedRegion: "Puri, Jagatsinghpur, Kendrapara, Khordha, Cuttack & Balasore",
     issuedAt: "06:30 AM Today",
     validUntil: "11:59 PM Tomorrow",
-    details: "Severe Cyclonic Storm over Bay of Bengal moving NW at 18 km/h. Gale winds gusting to 110-120 km/h with heavy to extremely heavy rainfall (>250mm). Evacuation protocol activated for low-lying blocks.",
+    details: "Deep depression over Bay of Bengal intensified into severe cyclonic storm moving NW at 18 km/h. Gale winds gusting to 110-120 km/h with heavy to extremely heavy rainfall (>250mm). Evacuation protocol activated for low-lying blocks.",
     coordinates: [
       [20.3500, 85.7000],
       [20.5500, 85.9500],
@@ -1045,6 +1045,24 @@ export const INITIAL_ALERTS = [
       [19.9000, 85.6500]
     ]
   },
+  {
+    id: "ALERT-OD-902",
+    title: "DAYA & KUSHABHADRA RIVER FLASH FLOOD SPILL ALERT",
+    source: "Odisha Water Resources Department (CE Basin Management)",
+    severity: "SEVERE",
+    affectedRegion: "Bhubaneswar Southern Margins, Pipili, Balianta & Nimapada",
+    issuedAt: "09:15 AM Today",
+    validUntil: "08:00 PM Today",
+    details: "Mahanadi Naraj barrage discharge exceeded 7.5 lakh cusecs. Daya and Kushabhadra distributaries overflowing banks. Lowland roads closed. Pre-position rescue boats immediately.",
+    coordinates: [
+      [20.3100, 85.8300],
+      [20.3000, 85.8900],
+      [20.1500, 85.9200],
+      [20.0800, 85.8200],
+      [20.2200, 85.8000]
+    ]
+  }
+];
   {
     id: "ALERT-OD-902",
     title: "DAYA & KUSHABHADRA RIVER FLASH FLOOD SPILL ALERT",
