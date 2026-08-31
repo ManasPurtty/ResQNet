@@ -52,10 +52,10 @@ export const CitizenNavbar = () => {
 
           <Link
             to="/authority/login"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900/80 hover:bg-gray-800 border border-gray-700/80 text-gray-300 hover:text-white text-xs font-medium transition-colors ml-1"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-900/90 hover:bg-gray-800 border border-gray-700/80 text-gray-200 hover:text-white text-xs font-semibold transition-all ml-1 shadow"
           >
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline">Authority Login</span>
+            <Lock className="w-3.5 h-3.5 text-blue-400" />
+            <span>Login / Sign Up</span>
           </Link>
         </div>
       </div>
