@@ -3,12 +3,13 @@ import { AuthorityHeader } from '../components/AuthorityHeader';
 import { CommandMap } from '../components/CommandMap';
 import { IncidentFeed } from '../components/IncidentFeed';
 import { IncidentDetailPanel } from '../components/IncidentDetailPanel';
+import { EmergencyRouteOptimizer } from '../components/EmergencyRouteOptimizer';
 import { SmsIvrWidget } from '../components/SmsIvrWidget';
 import { useAppState } from '../context/StateContext';
-import { ShieldAlert, Truck, Home, Activity } from 'lucide-react';
+import { ShieldAlert, Truck, Home, Activity, Navigation, Layers } from 'lucide-react';
 
 export const AuthorityDashboard = () => {
-  const { incidents, resources, shelters } = useAppState();
+  const { incidents, resources, shelters, activeTab, setActiveTab } = useAppState();
 
   const criticalCount = incidents.filter(i => i.severity === 'CRITICAL').length;
   const highCount = incidents.filter(i => i.severity === 'HIGH').length;
@@ -62,17 +63,51 @@ export const AuthorityDashboard = () => {
           <div className="bg-[#111827] border border-gray-800 rounded-xl px-4 py-2 text-xs flex items-center justify-between font-mono text-gray-300">
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span>SHELTER OCCUPANCY: <b>{totalShelterOcc} / {totalShelterCap}</b> ({Math.round((totalShelterOcc / totalShelterCap) * 100)}%)</span>
+              <span>ODISHA SHELTER OCCUPANCY: <b>{totalShelterOcc} / {totalShelterCap}</b> ({Math.round((totalShelterOcc / totalShelterCap) * 100)}%)</span>
             </div>
             <div className="text-gray-400 hidden sm:block">
-              RESCUE UNITS: <b>{resources.filter(r => r.status === 'AVAILABLE').length} AVAILABLE</b>
+              RESCUE UNITS: <b>{resources.filter(r => r.status === 'AVAILABLE').length} ODRAF/FIRE AVAILABLE</b>
             </div>
           </div>
         </div>
 
-        {/* Right Column (4 cols): INCIDENT DETAIL & RESOURCE MATCHING DRAWER */}
-        <div className="lg:col-span-4 h-full min-h-0 overflow-hidden">
-          <IncidentDetailPanel />
+        {/* Right Column (4 cols): TABBED PANELS (INCIDENT DETAILS vs EMERGENCY ROUTE OPTIMIZATION) */}
+        <div className="lg:col-span-4 flex flex-col h-full min-h-0 overflow-hidden space-y-2">
+          {/* Tab Switcher */}
+          <div className="bg-[#111827] border border-gray-800 p-1 rounded-xl flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setActiveTab('INCIDENT_DETAILS')}
+              className={`flex-1 py-1.5 rounded-lg font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                activeTab === 'INCIDENT_DETAILS'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Incident Details</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('ROUTE_OPTIMIZER')}
+              className={`flex-1 py-1.5 rounded-lg font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                activeTab === 'ROUTE_OPTIMIZER'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+              }`}
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Route Optimizer</span>
+            </button>
+          </div>
+
+          {/* Active Panel Viewport */}
+          <div className="flex-1 min-h-0">
+            {activeTab === 'ROUTE_OPTIMIZER' ? (
+              <EmergencyRouteOptimizer />
+            ) : (
+              <IncidentDetailPanel />
+            )}
+          </div>
         </div>
       </div>
     </div>

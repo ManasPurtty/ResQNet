@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CitizenNavbar } from '../components/CitizenNavbar';
 import { useAppState } from '../context/StateContext';
 import {
@@ -16,31 +16,39 @@ import {
 
 export const ReportEmergency = () => {
   const navigate = useNavigate();
+  const routeLocation = useLocation();
   const { addCitizenReport } = useAppState();
 
   const [formData, setFormData] = useState({
     type: 'FLOOD',
     severity: 'CRITICAL',
-    peopleAffected: 4,
-    peopleTrapped: 2,
-    vulnerablePeople: 1,
-    locationName: 'Saidapet Canal Bank',
-    address: 'Near West Canal Bank Road',
+    peopleAffected: 6,
+    peopleTrapped: 3,
+    vulnerablePeople: 2,
+    locationName: routeLocation.state?.defaultLocationName || 'Rasulgarh Daya Canal Basin, Bhubaneswar',
+    address: 'Near Canal Road, Rasulgarh',
     description: '',
     image: null,
     imagePreview: null,
     reporterName: '',
     phone: '',
-    lat: 13.0213,
-    lng: 80.2231
+    lat: routeLocation.state?.defaultLat || 20.2915,
+    lng: routeLocation.state?.defaultLng || 85.8640,
+    district: 'Khordha'
   });
 
-  const [locationStatus, setLocationStatus] = useState('Detecting current GPS location...');
+  const [locationStatus, setLocationStatus] = useState(
+    routeLocation.state?.defaultLat
+      ? '📍 Location pre-filled from your GPS locator'
+      : 'Detecting GPS location in Odisha...'
+  );
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(null);
 
-  // Auto Geolocation
+  // Auto Geolocation if not pre-filled
   useEffect(() => {
+    if (routeLocation.state?.defaultLat) return;
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -53,27 +61,27 @@ export const ReportEmergency = () => {
           setLocationStatus('📍 Location detected automatically via GPS');
         },
         () => {
-          setLocationStatus('📍 Default location selected (Saidapet River Bank)');
+          setLocationStatus('📍 Default Odisha location selected (Rasulgarh Canal Basin)');
         }
       );
     }
   }, []);
 
-  // Handle Description change + simulated AI classification (Section 35)
+  // Handle Description change + simulated AI classification
   const handleDescriptionChange = (e) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, description: val }));
 
-    if (val.length > 15) {
+    if (val.length > 12) {
       setIsAiAnalyzing(true);
       setTimeout(() => {
         setIsAiAnalyzing(false);
         setAiSuggestions({
-          detectedType: val.toLowerCase().includes('water') || val.toLowerCase().includes('flood') ? 'FLOOD' : 'EMERGENCY',
-          suggestedPriority: 'High',
+          detectedType: val.toLowerCase().includes('water') || val.toLowerCase().includes('flood') ? 'FLOOD' : val.toLowerCase().includes('wind') ? 'CYCLONE' : 'EMERGENCY',
+          suggestedPriority: 'Critical',
           peopleTrappedDetected: val.toLowerCase().includes('trap') || val.toLowerCase().includes('roof') ? 'Yes' : 'No'
         });
-      }, 500);
+      }, 400);
     }
   };
 
@@ -103,13 +111,13 @@ export const ReportEmergency = () => {
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8 space-y-6">
         <div className="text-center space-y-2">
           <span className="bg-red-950 text-red-400 border border-red-800 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            CITIZEN DISASTER REPORT
+            ODISHA CITIZEN DISASTER REPORTING
           </span>
           <h1 className="font-heading font-black text-3xl sm:text-4xl text-white">
             REPORT AN EMERGENCY
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm">
-            Your location and report details are routed instantly to the ResQNet Emergency Operations Command Center.
+            Your emergency report is routed directly to the Odisha State Disaster Operation Center (OSDMA / ODRAF).
           </p>
         </div>
 
@@ -119,7 +127,7 @@ export const ReportEmergency = () => {
             <div className="flex items-center justify-between">
               <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-red-500" />
-                Step 1 — Emergency Location
+                Step 1 — Emergency Location (Odisha)
               </span>
               <span className="text-[11px] text-emerald-400 font-mono font-medium">
                 {locationStatus}
@@ -128,26 +136,28 @@ export const ReportEmergency = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Area / Landmark</label>
+                <label className="text-xs text-gray-400 block mb-1">Area / Landmark in Odisha</label>
                 <input
                   type="text"
                   required
                   value={formData.locationName}
                   onChange={e => setFormData({ ...formData, locationName: e.target.value })}
                   className="w-full bg-[#151e32] border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-red-500"
-                  placeholder="e.g. Saidapet River Bank, Ward 14"
+                  placeholder="e.g. Rasulgarh Canal Road, Bhubaneswar"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Street Address</label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={e => setFormData({ ...formData, address: e.target.value })}
+                <label className="text-xs text-gray-400 block mb-1">District</label>
+                <select
+                  value={formData.district}
+                  onChange={e => setFormData({ ...formData, district: e.target.value })}
                   className="w-full bg-[#151e32] border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-red-500"
-                  placeholder="Door No, Street Name"
-                />
+                >
+                  {['Khordha', 'Cuttack', 'Puri', 'Kendrapara', 'Jagatsinghpur', 'Balasore', 'Ganjam', 'Sambalpur'].map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -160,12 +170,12 @@ export const ReportEmergency = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {[
-                { id: 'FLOOD', label: 'Flood', icon: '🌊' },
+                { id: 'FLOOD', label: 'Flood / Inundation', icon: '🌊' },
                 { id: 'CYCLONE', label: 'Cyclone', icon: '🌪️' },
                 { id: 'LANDSLIDE', label: 'Landslide', icon: '⛰️' },
                 { id: 'BUILDING_DAMAGE', label: 'Building Collapse', icon: '🏚️' },
                 { id: 'ROAD_BLOCKAGE', label: 'Road Blockage', icon: '🚧' },
-                { id: 'MEDICAL', label: 'Medical ICU', icon: '🚑' },
+                { id: 'MEDICAL', label: 'Medical Emergency', icon: '🚑' },
                 { id: 'FIRE', label: 'Fire Hazard', icon: '🔥' },
                 { id: 'OTHER', label: 'Other Hazard', icon: '⚠️' }
               ].map(item => (
@@ -289,19 +299,19 @@ export const ReportEmergency = () => {
               rows={3}
               value={formData.description}
               onChange={handleDescriptionChange}
-              placeholder="Briefly describe what is happening (e.g. Water entered houses, 4 people trapped on 1st floor...)"
+              placeholder="Describe what is happening (e.g. Daya river overflowed, 3 people trapped on roof, road blocked...)"
               className="w-full bg-[#151e32] border border-gray-700 rounded-xl p-3.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-red-500"
             />
 
-            {/* AI Assistant Output Card (Section 35) */}
+            {/* AI Assistant Output Card */}
             {aiSuggestions && (
               <div className="bg-blue-950/40 border border-blue-800/80 rounded-xl p-3 text-xs space-y-1 font-mono text-blue-200">
                 <div className="flex items-center gap-1.5 font-bold text-blue-400">
                   <Sparkles className="w-3.5 h-3.5" />
-                  AI Assistant Auto-Tagging
+                  AI Assistant Auto-Summarization
                 </div>
                 <div className="flex justify-between text-[11px] text-gray-300">
-                  <span>Detected Disaster: <b>{aiSuggestions.detectedType}</b></span>
+                  <span>Detected Type: <b>{aiSuggestions.detectedType}</b></span>
                   <span>Suggested Priority: <b className="text-red-400">{aiSuggestions.suggestedPriority}</b></span>
                   <span>People Trapped: <b>{aiSuggestions.peopleTrappedDetected}</b></span>
                 </div>
@@ -315,7 +325,7 @@ export const ReportEmergency = () => {
             className="w-full py-4 rounded-2xl font-heading font-black text-base bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-0.5 active:translate-y-0"
           >
             <AlertCircle className="w-6 h-6 animate-pulse" />
-            <span>🚨 REPORT EMERGENCY NOW</span>
+            <span>🚨 REPORT EMERGENCY TO ODISHA EOC</span>
           </button>
         </form>
       </main>

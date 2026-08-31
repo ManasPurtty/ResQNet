@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CitizenNavbar } from '../components/CitizenNavbar';
 import { CommandMap } from '../components/CommandMap';
+import { CitizenNearbyLocator } from '../components/CitizenNearbyLocator';
 import {
   Shield,
   AlertCircle,
@@ -65,28 +66,36 @@ export const LandingPage = () => {
             </div>
 
             {/* Quick stats strip */}
-            <div className="pt-6 border-t border-gray-800/80 grid grid-cols-3 gap-4 text-xs font-mono">
+            <div className="pt-4 border-t border-gray-800/80 grid grid-cols-3 gap-4 text-xs font-mono">
               <div>
                 <div className="text-gray-400">Response Speed</div>
                 <div className="text-xl font-bold text-emerald-400 font-heading">7 Min ETA</div>
               </div>
               <div>
-                <div className="text-gray-400">Resource Match</div>
-                <div className="text-xl font-bold text-blue-400 font-heading">94% Precision</div>
+                <div className="text-gray-400">Shelter Network</div>
+                <div className="text-xl font-bold text-blue-400 font-heading">Govt Schools</div>
               </div>
               <div>
-                <div className="text-gray-400">Fallback Channels</div>
-                <div className="text-xl font-bold text-amber-400 font-heading">SMS & IVR</div>
+                <div className="text-gray-400">Auto Allotment</div>
+                <div className="text-xl font-bold text-amber-400 font-heading">Fire + Hospital</div>
               </div>
             </div>
           </div>
 
-          {/* Right Hero Visual: Stylized Command Map Container */}
-          <div className="lg:col-span-6 h-[480px] relative rounded-3xl overflow-hidden border border-gray-800 shadow-2xl shadow-blue-500/10">
-            <CommandMap height="100%" interactive={false} />
-            <div className="absolute top-4 left-4 z-20 bg-[#151e32]/90 backdrop-blur-md border border-gray-700/80 p-2.5 rounded-xl text-xs flex items-center gap-2 text-gray-200">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              <span className="font-mono font-bold">LIVE EOC PREVIEW — ZONE 10</span>
+          {/* Right Hero Visual: Live Citizen Proximity Locator */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="bg-gradient-to-r from-blue-950/60 to-emerald-950/60 border border-blue-800/80 rounded-2xl p-4 flex items-center justify-between text-xs font-mono text-blue-200 shadow-xl">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>CITIZEN GPS RADAR ACTIVE</span>
+              </div>
+              <Link to="/my-reports" className="text-emerald-400 hover:underline font-bold flex items-center gap-1">
+                Track My Report <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+
+            <div className="relative rounded-3xl overflow-hidden border border-gray-800 shadow-2xl shadow-blue-500/10">
+              <CitizenNearbyLocator />
             </div>
           </div>
         </div>
