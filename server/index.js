@@ -4,12 +4,11 @@ import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import { connectDB } from './config/db.js';
+import { seedDemoAdmin } from './config/seedDemoAdmin.js';
 import apiRouter from './routes/api.js';
 import routeOptimizationRouter from './routes/routeOptimization.js';
 import authRouter from './routes/auth.js';
-
-// Connect to MongoDB Database (with seamless fallback)
-connectDB();
+import reportsRouter from './routes/reports.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -74,16 +73,34 @@ app.get('/health', (req, res) => {
 
 // Register API, Auth, and Route Optimization Routers
 app.use('/api/auth', authRouter);
+app.use('/api/reports', reportsRouter);
 app.use('/api', apiRouter);
 app.use('/api/routes', routeOptimizationRouter);
 
 const PORT = process.env.PORT || 5050;
 
-server.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`  ResQNet — Odisha Disaster Response Backend Server`);
-  console.log(`  API running on: http://localhost:${PORT}`);
-  console.log(`  Route Optimizer: POST http://localhost:${PORT}/api/routes/optimize`);
-  console.log(`  Real-time Socket.IO: ws://localhost:${PORT}`);
-  console.log(`=======================================================`);
+const startServer = async () => {
+  const connection = await connectDB();
+
+  if (connection) {
+    try {
+      await seedDemoAdmin();
+    } catch (error) {
+      console.error(`Demo admin seed failed: ${error.message}`);
+    }
+  }
+
+  server.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`  ResQNet — Odisha Disaster Response Backend Server`);
+    console.log(`  API running on: http://localhost:${PORT}`);
+    console.log(`  Route Optimizer: POST http://localhost:${PORT}/api/routes/optimize`);
+    console.log(`  Real-time Socket.IO: ws://localhost:${PORT}`);
+    console.log(`=======================================================`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error(`ResQNet server startup failed: ${error.message}`);
+  process.exit(1);
 });

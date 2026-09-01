@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { StateProvider } from './context/StateContext';
 import { ToastContainer } from './components/ToastContainer';
+import { RequireAuth } from './components/RequireAuth';
 
 import { LandingPage } from './pages/LandingPage';
 import { ReportEmergency } from './pages/ReportEmergency';
@@ -23,9 +24,9 @@ export default function App() {
         <Routes>
           {/* Public Citizen Routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/report" element={<ReportEmergency />} />
-          <Route path="/report/success" element={<ReportSuccess />} />
-          <Route path="/my-reports" element={<MyReports />} />
+          <Route path="/report" element={<RequireAuth><ReportEmergency /></RequireAuth>} />
+          <Route path="/report/success" element={<RequireAuth><ReportSuccess /></RequireAuth>} />
+          <Route path="/my-reports" element={<RequireAuth><MyReports /></RequireAuth>} />
 
           {/* Authority Routes */}
           <Route path="/authority/login" element={<AuthorityLogin />} />

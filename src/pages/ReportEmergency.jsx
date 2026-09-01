@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CitizenNavbar } from '../components/CitizenNavbar';
 import { useAppState } from '../context/StateContext';
+import { authService } from '../services/authService';
 import {
   AlertCircle,
   MapPin,
@@ -17,7 +18,7 @@ import {
 export const ReportEmergency = () => {
   const navigate = useNavigate();
   const routeLocation = useLocation();
-  const { addCitizenReport } = useAppState();
+  const { addCitizenReport, setCurrentUser } = useAppState();
 
   const [formData, setFormData] = useState({
     type: 'FLOOD',
@@ -44,6 +45,8 @@ export const ReportEmergency = () => {
   );
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Auto Geolocation if not pre-filled
   useEffect(() => {
@@ -88,20 +91,52 @@ export const ReportEmergency = () => {
   // Image Upload handler
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, image: file, imagePreview: url }));
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setSubmitError('Please choose an image smaller than 5 MB.');
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSubmitError('');
+      setFormData(prev => ({ ...prev, image: file.name, imagePreview: reader.result }));
+    };
+    reader.onerror = () => setSubmitError('The selected image could not be read.');
+    reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const createdIncident = addCitizenReport({
-      ...formData,
-      image: formData.imagePreview || "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80"
-    });
+    setIsSubmitting(true);
+    setSubmitError('');
 
-    navigate('/report/success', { state: { incident: createdIncident } });
+    try {
+      const authenticatedUser = await authService.getProfile();
+      if (!authenticatedUser) {
+        setCurrentUser(null);
+        navigate('/authority/login', {
+          replace: true,
+          state: { from: routeLocation, authRequired: true }
+        });
+        return;
+      }
+
+      setCurrentUser(authenticatedUser);
+      const createdIncident = await addCitizenReport({
+        ...formData,
+        image: formData.imagePreview || ''
+      });
+
+      if (createdIncident) {
+        navigate('/report/success', { state: { incident: createdIncident } });
+      }
+    } catch (error) {
+      setSubmitError(error.message || 'Your incident report could not be stored. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -320,12 +355,19 @@ export const ReportEmergency = () => {
           </div>
 
           {/* SUBMIT BUTTON */}
+          {submitError && (
+            <div className="rounded-xl border border-red-800 bg-red-950/70 p-3 text-xs text-red-200">
+              {submitError}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full py-4 rounded-2xl font-heading font-black text-base bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-0.5 active:translate-y-0"
+            disabled={isSubmitting}
+            className="w-full py-4 rounded-2xl font-heading font-black text-base bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-wait disabled:opacity-60"
           >
             <AlertCircle className="w-6 h-6 animate-pulse" />
-            <span>🚨 REPORT EMERGENCY TO ODISHA EOC</span>
+            <span>{isSubmitting ? 'STORING REPORT SECURELY...' : '🚨 REPORT EMERGENCY TO ODISHA EOC'}</span>
           </button>
         </form>
       </main>

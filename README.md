@@ -61,8 +61,8 @@ ResQNet visually and algorithmically answers the five critical questions emergen
 
 Authority login route: `/authority/login`
 
-- **Email**: `admin@resqnet.demo`
-- **Password**: `admin123`
+- **Email**: `resqnet.demo.admin@gmail.com`
+- **Password**: `Admin@123`
 
 ---
 

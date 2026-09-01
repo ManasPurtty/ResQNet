@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAppState } from '../context/StateContext';
 import { authService } from '../services/authService';
+import { DEMO_ADMIN } from '../../shared/demoCredentials';
 import {
   Shield,
   Lock,
@@ -21,7 +22,9 @@ import {
 
 export const AuthorityLogin = () => {
   const navigate = useNavigate();
+  const routeLocation = useLocation();
   const { setCurrentUser, addToast } = useAppState();
+  const returnTo = routeLocation.state?.from;
 
   const [tab, setTab] = useState('LOGIN'); // 'LOGIN' or 'SIGNUP'
   const [loading, setLoading] = useState(false);
@@ -29,8 +32,8 @@ export const AuthorityLogin = () => {
   const [dbStatus, setDbStatus] = useState({ status: 'ONLINE', dbEngine: 'MongoDB' });
 
   // Login Form
-  const [loginEmail, setLoginEmail] = useState('admin@resqnet.gov.in');
-  const [loginPassword, setLoginPassword] = useState('admin123');
+  const [loginEmail, setLoginEmail] = useState(DEMO_ADMIN.email);
+  const [loginPassword, setLoginPassword] = useState(DEMO_ADMIN.password);
 
   // User Signup Form (Simple for Citizens)
   const [signupData, setSignupData] = useState({
@@ -46,11 +49,11 @@ export const AuthorityLogin = () => {
 
   // 1-Click Fill Admin Credentials
   const fillAdminCredentials = () => {
-    setLoginEmail('admin@resqnet.gov.in');
-    setLoginPassword('admin123');
+    setLoginEmail(DEMO_ADMIN.email);
+    setLoginPassword(DEMO_ADMIN.password);
     setTab('LOGIN');
     setErrorMessage('');
-    addToast("Admin Credentials Filled", "admin@resqnet.gov.in / admin123", "info");
+    addToast("Admin Credentials Filled", `${DEMO_ADMIN.email} / ${DEMO_ADMIN.password}`, "info");
   };
 
   // 1-Click Fill Demo Citizen
@@ -73,7 +76,9 @@ export const AuthorityLogin = () => {
       setCurrentUser(res.user);
       addToast("Login Successful", `Welcome, ${res.user.name}!`, "success");
 
-      if (res.user.role === 'ADMIN' || res.user.role === 'AUTHORITY') {
+      if (returnTo?.pathname) {
+        navigate(returnTo.pathname, { replace: true, state: returnTo.state });
+      } else if (res.user.role === 'ADMIN' || res.user.role === 'AUTHORITY') {
         navigate('/authority/dashboard');
       } else {
         navigate('/my-reports');
@@ -103,7 +108,10 @@ export const AuthorityLogin = () => {
 
       setCurrentUser(res.user);
       addToast("Account Created", `Welcome to ResQNet, ${res.user.name}!`, "success");
-      navigate('/my-reports');
+      navigate(returnTo?.pathname || '/report', {
+        replace: true,
+        state: returnTo?.state
+      });
     } catch (err) {
       setErrorMessage(err.message || 'Sign up failed.');
       addToast("Sign Up Error", err.message || 'Please check your details', "critical");
@@ -149,8 +157,8 @@ export const AuthorityLogin = () => {
           </div>
 
           <div className="font-mono text-[11px] text-gray-300 flex items-center justify-between border-t border-gray-800/80 pt-1.5">
-            <span>Email: <b className="text-white">admin@resqnet.gov.in</b></span>
-            <span>Password: <b className="text-white">admin123</b></span>
+            <span>Email: <b className="text-white">{DEMO_ADMIN.email}</b></span>
+            <span>Password: <b className="text-white">{DEMO_ADMIN.password}</b></span>
           </div>
         </div>
 
@@ -179,6 +187,13 @@ export const AuthorityLogin = () => {
         </div>
 
         {/* Error Alert */}
+        {routeLocation.state?.authRequired && !errorMessage && (
+          <div className="bg-blue-950/80 border border-blue-800 rounded-xl p-3 text-xs text-blue-100 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-blue-400 shrink-0" />
+            <span>Log in or create an account to report and track an incident.</span>
+          </div>
+        )}
+
         {errorMessage && (
           <div className="bg-red-950/80 border border-red-800 rounded-xl p-3 text-xs text-red-200 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />

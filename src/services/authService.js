@@ -103,7 +103,8 @@ export const authService = {
       return data.user;
     } catch (err) {
       console.error('Get profile error:', err);
-      return this.getUser();
+      this.clearSession();
+      return null;
     }
   },
 

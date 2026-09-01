@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import {
   INITIAL_INCIDENTS,
   INITIAL_RESOURCES,
@@ -18,6 +18,8 @@ import {
   findNearestGovernmentSchoolShelter
 } from '../services/recommendationEngine';
 import { optimizeEmergencyRoute } from '../services/routeOptimizationEngine';
+import { authService } from '../services/authService';
+import { reportService } from '../services/reportService';
 
 const StateContext = createContext();
 
@@ -53,16 +55,6 @@ export const StateProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   const [isLiveSimulation, setIsLiveSimulation] = useState(false);
   
-  // Citizen's own submitted incident IDs (persistent in localStorage)
-  const [myReportedIncidentIds, setMyReportedIncidentIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem('resqnet_my_reports');
-      return saved ? JSON.parse(saved) : ["INC-1024"];
-    } catch {
-      return ["INC-1024"];
-    }
-  });
-
   // Demo Mode state
   const [isDemoPlaying, setIsDemoPlaying] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
@@ -96,9 +88,16 @@ export const StateProvider = ({ children }) => {
 
   // User auth state
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('resqnet_user');
-    return saved ? JSON.parse(saved) : { role: 'AUTHORITY', email: 'eoc.commander@odisha.gov.in', name: 'Odisha EOC Commander' };
+    try {
+      const saved = localStorage.getItem('resqnet_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
+  const [myIncidents, setMyIncidents] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportsError, setReportsError] = useState('');
 
   const addToast = (title, message, type = 'info') => {
     const id = Date.now() + Math.random();
@@ -113,6 +112,37 @@ export const StateProvider = ({ children }) => {
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
+
+  const refreshMyReports = useCallback(async () => {
+    if (!currentUser || !authService.getToken()) {
+      setMyIncidents([]);
+      setReportsError('');
+      return [];
+    }
+
+    setReportsLoading(true);
+    setReportsError('');
+
+    try {
+      const reports = await reportService.getMine();
+      setMyIncidents(reports);
+      setIncidents(previous => {
+        const reportIds = new Set(reports.map(report => report.id));
+        return [...reports, ...previous.filter(incident => !reportIds.has(incident.id))];
+      });
+      return reports;
+    } catch (error) {
+      if (error.status === 401) setCurrentUser(null);
+      setReportsError(error.message);
+      return [];
+    } finally {
+      setReportsLoading(false);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    refreshMyReports();
+  }, [refreshMyReports]);
 
   // AUTOMATIC ALLOTMENT ON INCIDENT SELECTION OR CHANGE
   const autoAllotNearestUnitsForIncident = (targetIncident) => {
@@ -169,8 +199,8 @@ export const StateProvider = ({ children }) => {
     }
   }, [selectedIncidentId]);
 
-  // Add Citizen Report + Automatic Allotment Trigger
-  const addCitizenReport = (reportData) => {
+  // Create a local-only incident for authority simulations and SMS ingestion.
+  const addSimulatedIncident = (reportData) => {
     const newId = `INC-${1030 + Math.floor(Math.random() * 100)}`;
     const priorityCalc = calculatePriorityScore({
       severity: reportData.severity,
@@ -212,15 +242,6 @@ export const StateProvider = ({ children }) => {
     setIncidents(prev => [newIncident, ...prev]);
     setSelectedIncidentId(newId);
 
-    // Save to citizen's personal report list
-    setMyReportedIncidentIds(prev => {
-      const updated = [newId, ...prev];
-      try {
-        localStorage.setItem('resqnet_my_reports', JSON.stringify(updated));
-      } catch {}
-      return updated;
-    });
-
     // Run Auto-Allotment for new incident
     const allotments = autoAllotNearestUnitsForIncident(newIncident);
 
@@ -231,6 +252,38 @@ export const StateProvider = ({ children }) => {
     );
 
     return newIncident;
+  };
+
+  // Persist a citizen report under the authenticated MongoDB user.
+  const addCitizenReport = async (reportData) => {
+    if (!currentUser || !authService.getToken()) {
+      addToast(
+        'Login Required',
+        'Please log in or create an account before reporting an incident.',
+        'alert'
+      );
+      return null;
+    }
+
+    try {
+      const newIncident = await reportService.create(reportData);
+      setIncidents(previous => [newIncident, ...previous.filter(incident => incident.id !== newIncident.id)]);
+      setMyIncidents(previous => [newIncident, ...previous.filter(incident => incident.id !== newIncident.id)]);
+      setSelectedIncidentId(newIncident.id);
+
+      const allotments = autoAllotNearestUnitsForIncident(newIncident);
+      addToast(
+        '🚨 Emergency Report Stored',
+        `${newIncident.id}: saved to MongoDB with priority ${newIncident.priorityScore}/100. Nearest response units are being matched.`,
+        'critical'
+      );
+
+      return { ...newIncident, allotments };
+    } catch (error) {
+      if (error.status === 401) setCurrentUser(null);
+      addToast('Report Submission Failed', error.message, 'alert');
+      throw error;
+    }
   };
 
   // Assign Rescue Team (Fire Station / ODRAF)
@@ -433,7 +486,7 @@ export const StateProvider = ({ children }) => {
     const sms = smsReports.find(s => s.id === smsId);
     if (!sms) return;
 
-    addCitizenReport({
+    addSimulatedIncident({
       type: sms.parsed.type,
       severity: sms.parsed.severity,
       peopleAffected: sms.parsed.peopleAffected,
@@ -534,7 +587,7 @@ export const StateProvider = ({ children }) => {
       },
       () => {
         setDemoStep(2);
-        const newInc = addCitizenReport({
+        const newInc = addSimulatedIncident({
           type: "FLOOD",
           severity: "CRITICAL",
           peopleAffected: 35,
@@ -659,9 +712,10 @@ export const StateProvider = ({ children }) => {
         activeTab,
         setActiveTab,
         // Citizen personal reports
-        myReportedIncidentIds,
-        setMyReportedIncidentIds,
-        myIncidents: incidents.filter(i => myReportedIncidentIds.includes(i.id))
+        myIncidents,
+        reportsLoading,
+        reportsError,
+        refreshMyReports
       }}
     >
       {children}

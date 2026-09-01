@@ -1,9 +1,19 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Shield, AlertCircle, FileText, Lock } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Shield, AlertCircle, FileText, Lock, LogOut, UserCircle2 } from 'lucide-react';
+import { useAppState } from '../context/StateContext';
+import { authService } from '../services/authService';
 
 export const CitizenNavbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { currentUser, setCurrentUser } = useAppState();
+
+  const handleLogout = () => {
+    authService.clearSession();
+    setCurrentUser(null);
+    navigate('/authority/login', { replace: true });
+  };
 
   return (
     <nav className="bg-[#0b111e]/90 backdrop-blur-md border-b border-gray-800 text-white sticky top-0 z-40">
@@ -50,13 +60,30 @@ export const CitizenNavbar = () => {
             <span>Report Emergency</span>
           </Link>
 
-          <Link
-            to="/authority/login"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-900/90 hover:bg-gray-800 border border-gray-700/80 text-gray-200 hover:text-white text-xs font-semibold transition-all ml-1 shadow"
-          >
-            <Lock className="w-3.5 h-3.5 text-blue-400" />
-            <span>Login / Sign Up</span>
-          </Link>
+          {currentUser ? (
+            <div className="flex items-center gap-2 ml-1">
+              <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-300 max-w-40">
+                <UserCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="truncate">{currentUser.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-950/70 hover:bg-red-900 border border-red-800 text-red-200 hover:text-white text-xs font-semibold transition-all shadow"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/authority/login"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-900/90 hover:bg-gray-800 border border-gray-700/80 text-gray-200 hover:text-white text-xs font-semibold transition-all ml-1 shadow"
+            >
+              <Lock className="w-3.5 h-3.5 text-blue-400" />
+              <span>Login / Sign Up</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

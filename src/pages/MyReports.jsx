@@ -15,11 +15,19 @@ import {
   MapPin,
   PlusCircle,
   ArrowRight,
-  Phone
+  Phone,
+  RefreshCw
 } from 'lucide-react';
 
 export const MyReports = () => {
-  const { myIncidents, resources, shelters } = useAppState();
+  const {
+    myIncidents,
+    resources,
+    shelters,
+    reportsLoading,
+    reportsError,
+    refreshMyReports
+  } = useAppState();
 
   return (
     <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans">
@@ -63,7 +71,24 @@ export const MyReports = () => {
             </span>
           </div>
 
-          {myIncidents.length === 0 ? (
+          {reportsLoading ? (
+            <div className="bg-[#111827] border border-gray-800 rounded-3xl p-8 text-center text-sm text-blue-200 shadow-xl">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-blue-400" />
+              Loading your reports from MongoDB...
+            </div>
+          ) : reportsError ? (
+            <div className="bg-red-950/50 border border-red-800 rounded-3xl p-6 text-center space-y-3 shadow-xl">
+              <p className="text-sm text-red-200">{reportsError}</p>
+              <button
+                type="button"
+                onClick={refreshMyReports}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-xs font-bold text-white hover:bg-red-600"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          ) : myIncidents.length === 0 ? (
             <div className="bg-[#111827] border border-gray-800 rounded-3xl p-8 text-center space-y-4 shadow-xl">
               <div className="w-12 h-12 rounded-2xl bg-slate-800 text-gray-400 flex items-center justify-center mx-auto text-2xl">
                 📋

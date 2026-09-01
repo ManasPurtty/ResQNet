@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAppState } from '../context/StateContext';
+import { authService } from '../services/authService';
 import {
   Shield,
   Activity,
@@ -28,7 +29,9 @@ export const AuthorityHeader = () => {
     demoStep,
     runDemoMode,
     simulateNewAlert,
-    alerts
+    alerts,
+    currentUser,
+    setCurrentUser
   } = useAppState();
 
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
@@ -39,6 +42,12 @@ export const AuthorityHeader = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleLogout = () => {
+    authService.clearSession();
+    setCurrentUser(null);
+    navigate('/authority/login', { replace: true });
+  };
 
   const navItems = [
     { label: 'EOC Dashboard', path: '/authority/dashboard', icon: LayoutDashboard },
@@ -182,16 +191,17 @@ export const AuthorityHeader = () => {
               AD
             </div>
             <div className="hidden lg:block text-left text-[11px]">
-              <div className="font-semibold text-gray-200">Admin Authority</div>
-              <div className="text-gray-400 text-[10px]">admin@resqnet.demo</div>
+              <div className="font-semibold text-gray-200">{currentUser?.name || 'Admin Authority'}</div>
+              <div className="text-gray-400 text-[10px]">{currentUser?.email || 'Authority session'}</div>
             </div>
-            <Link
-              to="/"
-              title="Return to Public Portal"
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Log out"
               className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors ml-1"
             >
               <LogOut className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </div>
