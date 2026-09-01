@@ -1,6 +1,7 @@
 import { authService } from './authService';
+import { API_BASE_URL } from '../config/api';
 
-const API_BASE_URL = 'http://localhost:5050/api/reports';
+const REPORTS_API_URL = `${API_BASE_URL}/reports`;
 
 const authenticatedRequest = async (path = '', options = {}) => {
   const token = authService.getToken();
@@ -10,7 +11,7 @@ const authenticatedRequest = async (path = '', options = {}) => {
     throw error;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${REPORTS_API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

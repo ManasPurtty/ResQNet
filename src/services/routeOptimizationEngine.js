@@ -1,4 +1,5 @@
 import { ODISHA_ROAD_HAZARDS } from '../data/mockData';
+import { API_BASE_URL } from '../config/api';
 
 // Helper: Haversine distance in meters
 function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -265,7 +266,7 @@ export async function calculateClientSideOptimizedRoutes(origin, destination, ve
 // Master Route Optimizer function (tries backend API first, then falls back seamlessly)
 export async function optimizeEmergencyRoute({ origin, destination, vehicleType = 'AMBULANCE', hazardRadiusMeters = 350 }) {
   try {
-    const res = await fetch('http://localhost:5050/api/routes/optimize', {
+    const res = await fetch(`${API_BASE_URL}/routes/optimize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

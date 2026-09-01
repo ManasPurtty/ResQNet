@@ -2,8 +2,9 @@
  * ResQNet Client Authentication Service
  * Handles communication with MongoDB / Express backend authentication API
  */
+import { API_BASE_URL } from '../config/api';
 
-const API_BASE_URL = 'http://localhost:5050/api/auth';
+const AUTH_API_URL = `${API_BASE_URL}/auth`;
 
 export const authService = {
   // Store authentication token and user data in localStorage
@@ -36,7 +37,7 @@ export const authService = {
   // Authenticate (Login) user or admin
   async login(email, password, role = null) {
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${AUTH_API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role })
@@ -59,7 +60,7 @@ export const authService = {
   // Register new account (Citizen or Authority)
   async register(userData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
+      const response = await fetch(`${AUTH_API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -85,7 +86,7 @@ export const authService = {
     if (!token) return null;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetch(`${AUTH_API_URL}/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -111,7 +112,7 @@ export const authService = {
   // Check backend and database connection status
   async getDbStatus() {
     try {
-      const res = await fetch(`${API_BASE_URL}/status`);
+      const res = await fetch(`${AUTH_API_URL}/status`);
       return await res.json();
     } catch {
       return { status: 'OFFLINE', dbEngine: 'In-Memory fallback' };

@@ -89,6 +89,12 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
+### Frontend Deployment
+
+Production frontend builds use `https://resqnet-uav3.onrender.com` as the API origin by default.
+To use a different backend, set `VITE_API_URL` to the backend origin before running `npm run build`.
+Do not include `/api` at the end of this value.
+
 ### Production Build
 ```bash
 npm run build
