@@ -13,12 +13,32 @@ import reportsRouter from './routes/reports.js';
 const app = express();
 const server = http.createServer(app);
 
-// Cross-Origin Resource Sharing configuration
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://resqnet-1-kaxz.onrender.com',
+  ...(process.env.CLIENT_URLS || process.env.CLIENT_URL || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+];
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Non-browser clients do not send an Origin header.
+    if (!origin || allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  },
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+// Cross-Origin Resource Sharing configuration
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -26,7 +46,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Real-Time Socket.IO Server
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });

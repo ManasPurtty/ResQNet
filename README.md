@@ -92,7 +92,12 @@ Open `http://localhost:3000` in your browser.
 ### Frontend Deployment
 
 Production frontend builds use `https://resqnet-uav3.onrender.com` as the API origin by default.
+On Render, set `VITE_API_URL` to `https://resqnet-uav3.onrender.com` before deploying the frontend.
 To use a different backend, set `VITE_API_URL` to the backend origin before running `npm run build`.
+The retired `https://resqnet-tuv3.onrender.com` deployment is automatically replaced with the working production origin in production builds.
+
+The backend accepts requests from the deployed frontend and the local Vite development ports.
+Set `CLIENT_URLS` to a comma-separated list of additional allowed frontend origins.
 Do not include `/api` at the end of this value.
 
 ### Production Build
