@@ -26,8 +26,8 @@ export const NearbyEmergencyBanner = () => {
   return (
     <div className="fixed bottom-4 left-1/2 z-[1000] w-[min(94vw,46rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-red-500 bg-gradient-to-r from-red-950 via-[#341215] to-orange-950 text-white shadow-2xl shadow-red-950/70">
       <div className="h-1 w-full animate-pulse bg-gradient-to-r from-red-500 via-amber-400 to-red-500" />
-      <div className="flex items-start gap-3 p-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-400/40 bg-red-600/30">
+      <div className="flex items-start gap-2.5 p-3 sm:gap-3 sm:p-4">
+        <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-400/40 bg-red-600/30 min-[360px]:flex">
           <AlertTriangle className="h-6 w-6 animate-pulse text-amber-300" />
         </div>
         <div className="min-w-0 flex-1">
@@ -40,7 +40,7 @@ export const NearbyEmergencyBanner = () => {
               </span>
             )}
           </div>
-          <h3 className="mt-1 font-heading text-base font-black">{urgentNotification.title}</h3>
+          <h3 className="mt-1 font-heading text-sm font-black sm:text-base">{urgentNotification.title}</h3>
           <p className="mt-1 text-xs leading-relaxed text-red-50">{urgentNotification.message}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button

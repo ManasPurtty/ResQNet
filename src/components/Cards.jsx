@@ -49,13 +49,13 @@ export const ResourceCard = ({ resource, onStatusChange }) => {
 
   return (
     <div className="bg-[#111827] border border-gray-800 hover:border-blue-500/40 rounded-2xl p-4 space-y-3 shadow-xl transition-all">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400 text-lg">
             🚑
           </div>
-          <div>
-            <h4 className="font-heading font-bold text-sm text-gray-100">{resource.name}</h4>
+          <div className="min-w-0">
+            <h4 className="font-heading font-bold text-sm leading-snug text-gray-100">{resource.name}</h4>
             <p className="text-[11px] text-gray-400 font-mono">ID: {resource.id}</p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export const ResourceCard = ({ resource, onStatusChange }) => {
         <select
           value={resource.status}
           onChange={(e) => onStatusChange(resource.id, e.target.value)}
-          className={`font-mono text-xs font-bold px-2.5 py-1 rounded-lg border focus:outline-none cursor-pointer ${
+          className={`w-full sm:w-auto font-mono text-xs font-bold px-2.5 py-2 sm:py-1 rounded-lg border focus:outline-none cursor-pointer ${
             isAvailable
               ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
               : isAssigned
@@ -81,15 +81,15 @@ export const ResourceCard = ({ resource, onStatusChange }) => {
       </div>
 
       <div className="space-y-1.5 text-xs text-gray-300 border-t border-b border-gray-800/80 py-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-gray-400">Location:</span>
           <span>📍 {resource.location.name}</span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-gray-400">Rescue Capacity:</span>
           <span className="font-mono font-bold text-gray-200">{resource.capacity} persons</span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-gray-400">Contact:</span>
           <span className="font-mono text-blue-300">{resource.contactPerson}</span>
         </div>
@@ -194,7 +194,7 @@ export const AlertCard = ({ alert }) => {
       <h4 className="font-heading font-bold text-base text-gray-100">{alert.title}</h4>
       <p className="text-xs text-gray-300 leading-relaxed">{alert.details}</p>
 
-      <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-800 font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400 pt-2 border-t border-gray-800 font-mono">
         <span>Affected: <b className="text-gray-200">{alert.affectedRegion}</b></span>
         <span>Issued: <b className="text-blue-300">{alert.issuedAt}</b></span>
       </div>

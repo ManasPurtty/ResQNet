@@ -289,17 +289,17 @@ export const CitizenNearbyLocator = () => {
   }
 
   return (
-    <div className="bg-[#111827] border border-gray-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+    <div className="bg-[#111827] border border-gray-800 rounded-3xl p-4 sm:p-8 space-y-5 sm:space-y-6 shadow-2xl relative overflow-hidden">
       {/* Top Banner with GPS Status & Action */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="bg-blue-950 text-blue-400 border border-blue-800 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1.5">
+            <span className="max-w-full bg-blue-950 text-blue-400 border border-blue-800 text-[9px] sm:text-[10px] leading-relaxed font-mono font-bold px-2.5 py-1 rounded-xl sm:rounded-full uppercase flex items-center gap-1.5">
               <LocateFixed className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
               CITIZEN PROXIMITY RADAR & EVACUATION FINDER
             </span>
           </div>
-          <h2 className="font-heading font-black text-2xl sm:text-3xl text-white">
+          <h2 className="font-heading font-black text-xl sm:text-3xl text-white">
             Emergency Facilities at Your Location
           </h2>
           <p className="text-gray-400 text-xs sm:text-sm">
@@ -319,10 +319,10 @@ export const CitizenNearbyLocator = () => {
 
       {/* Location Bar & Quick Area Selectors */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-[#151e32] p-3.5 rounded-2xl border border-gray-800">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span className="font-mono font-semibold text-gray-300">{locationStatus}:</span>
-          <span className="font-mono font-bold text-blue-400 bg-blue-950/90 px-2.5 py-1 rounded-lg border border-blue-900">
+          <span className="font-mono font-semibold leading-relaxed text-gray-300">{locationStatus}:</span>
+          <span className="max-w-full break-words font-mono font-bold text-blue-400 bg-blue-950/90 px-2.5 py-1 rounded-lg border border-blue-900">
             {userLocation.name}
           </span>
         </div>
@@ -347,14 +347,14 @@ export const CitizenNearbyLocator = () => {
       {/* Main Interactive Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Map (7 Cols) */}
-        <div className="lg:col-span-7 h-[460px] rounded-2xl overflow-hidden border border-gray-800 relative shadow-2xl">
+        <div className="lg:col-span-7 h-[340px] sm:h-[460px] rounded-2xl overflow-hidden border border-gray-800 relative shadow-2xl">
           <div ref={mapContainerRef} className="w-full h-full dark-map z-0" />
-          <div className="absolute top-3 left-3 z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700 px-3 py-1.5 rounded-xl text-xs font-mono text-gray-200 shadow-lg flex items-center gap-2">
+          <div className="absolute top-3 left-3 right-3 sm:right-auto z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-mono text-gray-200 shadow-lg flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-400"></span>
             <span>Click anywhere to move your location pin</span>
           </div>
 
-          <div className="absolute bottom-3 left-3 z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700 px-3 py-1.5 rounded-xl text-[11px] font-mono text-gray-300 shadow-lg flex items-center gap-3">
+          <div className="absolute bottom-3 left-3 right-3 sm:right-auto z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-[9px] sm:text-[11px] font-mono text-gray-300 shadow-lg flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="flex items-center gap-1">🏫 Shelter</span>
             <span className="flex items-center gap-1">🚑 Hospital</span>
             <span className="flex items-center gap-1">🚒 Fire Station</span>
@@ -420,7 +420,7 @@ export const CitizenNearbyLocator = () => {
                         : 'border-orange-900/80 hover:border-orange-500'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span
                         className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${
                           isShelter
@@ -447,7 +447,7 @@ export const CitizenNearbyLocator = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-gray-300 border-t border-gray-800/80 pt-2 font-mono">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 border-t border-gray-800/80 pt-2 font-mono">
                       <span className="text-emerald-400">⏱️ ~{item.etaMin} mins away</span>
                       {isShelter && (
                         <span className="text-gray-200"><b>{item.available}</b> beds free</span>

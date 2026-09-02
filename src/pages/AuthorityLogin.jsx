@@ -121,9 +121,9 @@ export const AuthorityLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col items-center justify-center p-3 sm:p-4 py-5 font-sans relative overflow-hidden">
       {/* Background radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(500px,100vw)] h-[min(500px,100vw)] bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-md w-full bg-[#111827] border border-gray-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative z-10">
         {/* Brand Header */}
@@ -142,7 +142,7 @@ export const AuthorityLogin = () => {
 
         {/* Example Test Credentials for Admin (1-Click) */}
         <div className="bg-gradient-to-r from-blue-950/80 to-slate-900 border border-blue-800/80 rounded-2xl p-3.5 space-y-2 text-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 font-mono font-bold text-amber-300">
               <Key className="w-3.5 h-3.5" />
               <span>TEST ADMIN CREDENTIALS</span>
@@ -156,7 +156,7 @@ export const AuthorityLogin = () => {
             </button>
           </div>
 
-          <div className="font-mono text-[11px] text-gray-300 flex items-center justify-between border-t border-gray-800/80 pt-1.5">
+          <div className="font-mono text-[10px] sm:text-[11px] text-gray-300 flex flex-col gap-1 border-t border-gray-800/80 pt-1.5 sm:flex-row sm:items-center sm:justify-between">
             <span>Email: <b className="text-white">{DEMO_ADMIN.email}</b></span>
             <span>Password: <b className="text-white">{DEMO_ADMIN.password}</b></span>
           </div>

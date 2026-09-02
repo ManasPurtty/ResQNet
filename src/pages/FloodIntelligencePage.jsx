@@ -146,22 +146,22 @@ export const FloodIntelligencePage = () => {
   return (
     <div className="min-h-screen bg-[#090d16] text-gray-100">
       <AuthorityHeader />
-      <main className="mx-auto max-w-[1600px] space-y-4 p-4">
-        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-blue-900/60 bg-gradient-to-r from-[#111827] to-blue-950/30 p-5 lg:flex-row lg:items-center">
+      <main className="mx-auto max-w-[1600px] space-y-4 p-2.5 sm:p-4">
+        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-blue-900/60 bg-gradient-to-r from-[#111827] to-blue-950/30 p-4 sm:p-5 lg:flex-row lg:items-center">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">
               <Radio className="h-3.5 w-3.5 animate-pulse" /> Predictive flood response layer
             </div>
-            <h1 className="mt-2 font-heading text-3xl font-black text-white">RIVER-TO-RESCUE INTELLIGENCE</h1>
+            <h1 className="mt-2 font-heading text-2xl font-black leading-tight text-white sm:text-3xl">RIVER-TO-RESCUE INTELLIGENCE</h1>
             <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-400">
               Converts gauge rise into downstream arrival windows, removes failed roads and bridges from response routes, and accounts for households that are safe or need rescue.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={loadDashboard} disabled={loading} className="flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-900 px-4 py-2 text-xs font-bold text-gray-200 hover:bg-gray-800 disabled:opacity-50">
+          <div className="grid grid-cols-1 gap-2 min-[390px]:grid-cols-2 lg:flex lg:flex-wrap">
+            <button type="button" onClick={loadDashboard} disabled={loading} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-900 px-3 sm:px-4 py-2 text-xs font-bold text-gray-200 hover:bg-gray-800 disabled:opacity-50">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh MongoDB
             </button>
-            <button type="button" onClick={runSimulation} disabled={Boolean(actionLoading) || dashboard?.storageMode === 'DEMO_PREVIEW'} className="flex items-center gap-2 rounded-xl border border-red-500 bg-red-600 px-4 py-2 text-xs font-black text-white shadow-lg shadow-red-950/40 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50">
+            <button type="button" onClick={runSimulation} disabled={Boolean(actionLoading) || dashboard?.storageMode === 'DEMO_PREVIEW'} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-500 bg-red-600 px-3 sm:px-4 py-2 text-xs font-black text-white shadow-lg shadow-red-950/40 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50">
               <Siren className="h-4 w-4" /> {actionLoading === 'SIMULATE' ? 'GENERATING...' : 'SIMULATE RAPID RISE'}
             </button>
           </div>
@@ -187,14 +187,14 @@ export const FloodIntelligencePage = () => {
 
         <section className="grid gap-4 xl:grid-cols-12">
           <div className="overflow-hidden rounded-3xl border border-gray-800 bg-[#111827] xl:col-span-7">
-            <div className="flex items-center justify-between border-b border-gray-800 px-5 py-3">
+            <div className="flex flex-col gap-2 border-b border-gray-800 px-4 sm:px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="flex items-center gap-2 font-heading text-sm font-black text-white"><MapPinned className="h-4 w-4 text-cyan-400" /> DOWNSTREAM ARRIVAL MAP</h2>
                 <p className="mt-0.5 text-[10px] text-gray-500">Forecast wave path, impact radiuses, and verified infrastructure condition</p>
               </div>
               <span className="rounded-full border border-blue-800 bg-blue-950 px-2.5 py-1 text-[9px] font-black text-blue-300">{forecast?.isSimulation ? 'SIMULATION' : 'LIVE FEED'}</span>
             </div>
-            <div className="h-[470px]">
+            <div className="h-[360px] sm:h-[470px]">
               {forecast && (
                 <MapContainer center={[20.26, 85.84]} zoom={9} className="h-full w-full" scrollWheelZoom>
                   <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -230,7 +230,7 @@ export const FloodIntelligencePage = () => {
                 </div>
                 <Gauge className="h-8 w-8" />
               </div>
-              <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+              <div className="mt-5 grid grid-cols-1 gap-2 text-center min-[360px]:grid-cols-3">
                 <div className="rounded-xl bg-black/20 p-3"><div className="text-[9px] uppercase opacity-70">Current</div><div className="mt-1 text-lg font-black">{station?.currentLevelM}m</div></div>
                 <div className="rounded-xl bg-black/20 p-3"><div className="text-[9px] uppercase opacity-70">Warning</div><div className="mt-1 text-lg font-black">{station?.warningLevelM}m</div></div>
                 <div className="rounded-xl bg-black/20 p-3"><div className="text-[9px] uppercase opacity-70">Danger</div><div className="mt-1 text-lg font-black">{station?.dangerLevelM}m</div></div>
@@ -304,7 +304,7 @@ export const FloodIntelligencePage = () => {
               <h2 className="flex items-center gap-2 font-heading text-base font-black text-white"><HeartPulse className="h-5 w-5 text-red-400" /> SAFE / RESCUE ACCOUNTABILITY</h2>
               <p className="mt-1 text-[10px] text-gray-500">Household responses arrive in real time and remain linked to their warning in MongoDB.</p>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
               <div className="rounded-2xl border border-emerald-800 bg-emerald-950/35 p-4">
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                 <div className="mt-2 text-2xl font-black text-emerald-200">{checkInSummary.safe.people}</div>

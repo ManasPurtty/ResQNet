@@ -143,12 +143,12 @@ export const ReportEmergency = () => {
     <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans">
       <CitizenNavbar />
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8 space-y-6">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 py-5 sm:py-8 space-y-5 sm:space-y-6">
         <div className="text-center space-y-2">
           <span className="bg-red-950 text-red-400 border border-red-800 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider">
             ODISHA CITIZEN DISASTER REPORTING
           </span>
-          <h1 className="font-heading font-black text-3xl sm:text-4xl text-white">
+          <h1 className="font-heading font-black text-2xl sm:text-4xl text-white">
             REPORT AN EMERGENCY
           </h1>
           <p className="text-gray-400 text-xs sm:text-sm">
@@ -158,13 +158,13 @@ export const ReportEmergency = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* STEP 1: LOCATION */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
-            <div className="flex items-center justify-between">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-red-500" />
                 Step 1 — Emergency Location (Odisha)
               </span>
-              <span className="text-[11px] text-emerald-400 font-mono font-medium">
+              <span className="text-[10px] sm:text-[11px] leading-relaxed text-emerald-400 font-mono font-medium">
                 {locationStatus}
               </span>
             </div>
@@ -201,7 +201,7 @@ export const ReportEmergency = () => {
           </div>
 
           {/* STEP 2: EMERGENCY TYPE */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
             <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider block">
               Step 2 — Emergency Type
             </span>
@@ -221,7 +221,7 @@ export const ReportEmergency = () => {
                   type="button"
                   key={item.id}
                   onClick={() => setFormData({ ...formData, type: item.id })}
-                  className={`p-3 rounded-xl border text-left flex flex-col items-center justify-center gap-1 transition-all ${
+                  className={`min-h-24 p-2.5 sm:p-3 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all ${
                     formData.type === item.id
                       ? 'bg-red-950/80 border-red-500 text-white shadow-lg shadow-red-600/20 scale-105'
                       : 'bg-[#151e32] border-gray-800 text-gray-300 hover:border-gray-700'
@@ -235,12 +235,12 @@ export const ReportEmergency = () => {
           </div>
 
           {/* STEP 3: SEVERITY LEVEL */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
             <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider block">
               Step 3 — Severity Level
             </span>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[
                 { id: 'CRITICAL', label: 'Critical', color: 'bg-red-600 border-red-400' },
                 { id: 'HIGH', label: 'High', color: 'bg-orange-600 border-orange-400' },
@@ -264,12 +264,12 @@ export const ReportEmergency = () => {
           </div>
 
           {/* STEP 4: PEOPLE COUNTS */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
             <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider block">
               Step 4 — People Needing Rescue
             </span>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">People Affected</label>
                 <input
@@ -306,12 +306,12 @@ export const ReportEmergency = () => {
           </div>
 
           {/* STEP 5: PHOTO UPLOAD */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
             <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider block">
               Step 5 — Incident Photo (Optional)
             </span>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#151e32] hover:bg-gray-800 border border-gray-700 text-xs font-semibold text-gray-200 cursor-pointer transition-colors">
                 <Upload className="w-4 h-4 text-blue-400" />
                 <span>Upload Photo</span>
@@ -327,7 +327,7 @@ export const ReportEmergency = () => {
           </div>
 
           {/* STEP 6: DESCRIPTION + AI ASSISTANT */}
-          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div className="bg-[#111827] border border-gray-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
             <span className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider block">
               Step 6 — Incident Description
             </span>
@@ -348,7 +348,7 @@ export const ReportEmergency = () => {
                   <Sparkles className="w-3.5 h-3.5" />
                   AI Assistant Auto-Summarization
                 </div>
-                <div className="flex justify-between text-[11px] text-gray-300">
+                <div className="flex flex-col gap-1 text-[11px] text-gray-300 sm:flex-row sm:flex-wrap sm:justify-between">
                   <span>Detected Type: <b>{aiSuggestions.detectedType}</b></span>
                   <span>Suggested Priority: <b className="text-red-400">{aiSuggestions.suggestedPriority}</b></span>
                   <span>People Trapped: <b>{aiSuggestions.peopleTrappedDetected}</b></span>
@@ -367,9 +367,9 @@ export const ReportEmergency = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl font-heading font-black text-base bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-wait disabled:opacity-60"
+            className="w-full px-3 py-4 rounded-2xl font-heading font-black text-sm sm:text-base bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-2 sm:gap-3 text-center transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-wait disabled:opacity-60"
           >
-            <AlertCircle className="w-6 h-6 animate-pulse" />
+            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 animate-pulse" />
             <span>{isSubmitting ? 'STORING REPORT SECURELY...' : '🚨 REPORT EMERGENCY TO ODISHA EOC'}</span>
           </button>
         </form>

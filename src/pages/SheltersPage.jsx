@@ -164,10 +164,10 @@ export const SheltersPage = () => {
             </div>
 
             {/* View Mode Toggle: Nearest Top 3-5 vs All Shelters */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2 lg:flex lg:items-center lg:shrink-0">
               <button
                 onClick={() => setViewMode('NEARBY_INCIDENT')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 ${
+                className={`min-h-11 px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center justify-center gap-1.5 ${
                   viewMode === 'NEARBY_INCIDENT'
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg border border-emerald-400/40'
                     : 'bg-[#151e32] text-gray-400 hover:text-white border border-gray-800'
@@ -179,7 +179,7 @@ export const SheltersPage = () => {
 
               <button
                 onClick={() => setViewMode('ALL_SHELTERS')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 ${
+                className={`min-h-11 px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center justify-center gap-1.5 ${
                   viewMode === 'ALL_SHELTERS'
                     ? 'bg-blue-600 text-white shadow-lg border border-blue-400/40'
                     : 'bg-[#151e32] text-gray-400 hover:text-white border border-gray-800'
@@ -243,7 +243,7 @@ export const SheltersPage = () => {
             return (
               <div
                 key={sh.id}
-                className={`bg-[#111827] border rounded-2xl p-5 space-y-4 shadow-xl transition-all relative overflow-hidden flex flex-col justify-between ${
+                className={`bg-[#111827] border rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl transition-all relative overflow-hidden flex flex-col justify-between ${
                   sh.isAssigned
                     ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-gradient-to-b from-[#111827] to-emerald-950/20'
                     : isTopRanked && viewMode === 'NEARBY_INCIDENT'
@@ -252,8 +252,8 @@ export const SheltersPage = () => {
                 }`}
               >
                 {/* Top Badge Banner */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs font-bold text-gray-400 bg-gray-800 px-2 py-0.5 rounded">
                       #{index + 1}
                     </span>
@@ -374,8 +374,8 @@ export const SheltersPage = () => {
 
                 {/* Authorized Emergency Contact */}
                 {sh.authorizedEmergencyContact && (
-                  <div className="text-[11px] text-gray-300 bg-[#151e32] p-2 rounded-lg border border-gray-800 flex items-center justify-between">
-                    <div className="truncate">
+                  <div className="text-[11px] text-gray-300 bg-[#151e32] p-2 rounded-lg border border-gray-800 flex flex-col items-start gap-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
+                    <div className="min-w-0">
                       <div className="font-semibold text-gray-200">{sh.authorizedEmergencyContact.name}</div>
                       <div className="text-[9px] text-gray-400 font-mono">{sh.authorizedEmergencyContact.role}</div>
                     </div>
@@ -386,7 +386,7 @@ export const SheltersPage = () => {
                 )}
 
                 {/* ADMIN ACTION BUTTONS: ASSIGN SHELTER & ROUTE OPTIMIZE */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800">
+                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-gray-800 min-[380px]:grid-cols-2">
                   <button
                     onClick={() => handleAssignShelter(sh.id)}
                     disabled={sh.isAssigned || activatingId === sh.id}

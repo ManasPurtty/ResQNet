@@ -86,7 +86,7 @@ export const AnalyticsPage = () => {
         </div>
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             title="Active Incidents"
             value={activeIncidentsCount}
@@ -122,7 +122,7 @@ export const AnalyticsPage = () => {
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Incidents by Type Bar Chart */}
-          <div className="lg:col-span-7 bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-7 bg-[#111827] border border-gray-800 rounded-2xl p-3 sm:p-5 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider">
               Incidents Breakdown by Disaster Type
             </h3>
@@ -141,7 +141,7 @@ export const AnalyticsPage = () => {
           </div>
 
           {/* Incidents by Severity Pie Chart */}
-          <div className="lg:col-span-5 bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-5 bg-[#111827] border border-gray-800 rounded-2xl p-3 sm:p-5 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider">
               Incidents Severity Distribution
             </h3>
@@ -173,7 +173,7 @@ export const AnalyticsPage = () => {
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Response Performance Trend Area Chart */}
-          <div className="lg:col-span-7 bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-7 bg-[#111827] border border-gray-800 rounded-2xl p-3 sm:p-5 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider">
               Response Time Velocity Trend (ETA Minutes)
             </h3>
@@ -192,7 +192,7 @@ export const AnalyticsPage = () => {
           </div>
 
           {/* Resource Utilization Status */}
-          <div className="lg:col-span-5 bg-[#111827] border border-gray-800 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-5 bg-[#111827] border border-gray-800 rounded-2xl p-3 sm:p-5 space-y-4 shadow-xl">
             <h3 className="font-heading font-bold text-sm text-gray-200 uppercase tracking-wider">
               Resource Utilization Status
             </h3>

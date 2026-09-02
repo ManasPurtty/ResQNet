@@ -18,14 +18,14 @@ export const AuthorityDashboard = () => {
   const totalShelterOcc = shelters.reduce((acc, s) => acc + s.occupied, 0);
 
   return (
-    <div className="min-h-screen h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans lg:h-screen lg:overflow-hidden">
       {/* Top Command Center Header */}
       <AuthorityHeader />
 
       {/* Main EOC Command Grid Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 p-3 min-h-0 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 p-2 sm:p-3 lg:min-h-0 lg:overflow-hidden">
         {/* Left Column (3 cols): Incident Feed & Low Connectivity Fallback */}
-        <div className="lg:col-span-3 flex flex-col gap-3 h-full min-h-0 overflow-hidden">
+        <div className="lg:col-span-3 flex flex-col gap-3 lg:h-full lg:min-h-0 lg:overflow-hidden">
           {/* Quick Counter Summary Bar */}
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className="bg-[#111827] p-2 rounded-xl border border-red-900/60 text-red-400">
@@ -43,25 +43,25 @@ export const AuthorityDashboard = () => {
           </div>
 
           {/* Live Incident Feed Container */}
-          <div className="flex-1 min-h-0">
+          <div className="h-[520px] sm:h-[580px] lg:h-auto lg:flex-1 lg:min-h-0">
             <IncidentFeed />
           </div>
 
           {/* SMS / IVR Fallback Widget */}
-          <div className="h-44 shrink-0">
+          <div className="min-h-44 lg:h-44 lg:shrink-0">
             <SmsIvrWidget />
           </div>
         </div>
 
         {/* Center Column (5 cols): DOMINANT LIVE MAP VIEWPORT */}
-        <div className="lg:col-span-5 flex flex-col h-full min-h-0 space-y-2">
-          <div className="flex-1 relative rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
+        <div className="lg:col-span-5 flex flex-col space-y-2 lg:h-full lg:min-h-0">
+          <div className="relative h-[390px] sm:h-[520px] overflow-hidden rounded-2xl border border-gray-800 shadow-2xl lg:h-auto lg:flex-1">
             <CommandMap height="100%" interactive={true} />
           </div>
 
           {/* Bottom EOC Status Ticker Bar */}
-          <div className="bg-[#111827] border border-gray-800 rounded-xl px-4 py-2 text-xs flex items-center justify-between font-mono text-gray-300">
-            <div className="flex items-center gap-2">
+          <div className="bg-[#111827] border border-gray-800 rounded-xl px-3 sm:px-4 py-2 text-[10px] sm:text-xs flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between font-mono text-gray-300">
+            <div className="flex items-start sm:items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
               <span>ODISHA SHELTER OCCUPANCY: <b>{totalShelterOcc} / {totalShelterCap}</b> ({Math.round((totalShelterOcc / totalShelterCap) * 100)}%)</span>
             </div>
@@ -72,7 +72,7 @@ export const AuthorityDashboard = () => {
         </div>
 
         {/* Right Column (4 cols): TABBED PANELS (INCIDENT DETAILS vs EMERGENCY ROUTE OPTIMIZATION) */}
-        <div className="lg:col-span-4 flex flex-col h-full min-h-0 overflow-hidden space-y-2">
+        <div className="lg:col-span-4 flex flex-col space-y-2 lg:h-full lg:min-h-0 lg:overflow-hidden">
           {/* Tab Switcher */}
           <div className="bg-[#111827] border border-gray-800 p-1 rounded-xl flex items-center gap-1 shrink-0">
             <button
@@ -84,7 +84,7 @@ export const AuthorityDashboard = () => {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Incident Details</span>
+              <span className="leading-tight">Incident Details</span>
             </button>
 
             <button
@@ -96,12 +96,12 @@ export const AuthorityDashboard = () => {
               }`}
             >
               <Navigation className="w-3.5 h-3.5" />
-              <span>Route Optimizer</span>
+              <span className="leading-tight">Route Optimizer</span>
             </button>
           </div>
 
           {/* Active Panel Viewport */}
-          <div className="flex-1 min-h-0">
+          <div className="h-[760px] sm:h-[700px] lg:h-auto lg:flex-1 lg:min-h-0">
             {activeTab === 'ROUTE_OPTIMIZER' ? (
               <EmergencyRouteOptimizer />
             ) : (

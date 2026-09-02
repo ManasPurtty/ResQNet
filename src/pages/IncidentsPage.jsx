@@ -60,13 +60,13 @@ export const IncidentsPage = () => {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs w-full sm:w-auto">
+          <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 text-xs sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
             <span className="text-gray-400 font-mono">Severity:</span>
             {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(sev => (
               <button
                 key={sev}
                 onClick={() => setFilterSeverity(sev)}
-                className={`px-3 py-1 rounded-lg font-mono font-bold transition-all ${
+                className={`shrink-0 px-3 py-1.5 sm:py-1 rounded-lg font-mono font-bold transition-all ${
                   filterSeverity === sev
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-[#151e32] text-gray-400 hover:text-white border border-gray-800'
@@ -78,8 +78,37 @@ export const IncidentsPage = () => {
           </div>
         </div>
 
+        <div className="space-y-3 md:hidden">
+          {filtered.map(inc => (
+            <article key={inc.id} className="rounded-2xl border border-gray-800 bg-[#111827] p-4 shadow-xl">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-black text-blue-400">{inc.id}</span>
+                    <span className="rounded border border-gray-700 bg-gray-900 px-2 py-0.5 text-[9px] font-bold text-gray-300">{inc.type}</span>
+                  </div>
+                  <h2 className="mt-2 text-sm font-bold leading-snug text-white">{inc.title}</h2>
+                  <p className="mt-1 text-[11px] leading-relaxed text-gray-400">📍 {inc.location.name}</p>
+                </div>
+                <div className="shrink-0 rounded-xl border border-red-800 bg-red-950/60 px-3 py-2 text-center">
+                  <div className="text-[8px] font-bold uppercase text-red-300">Priority</div>
+                  <div className="font-mono text-lg font-black text-red-400">{inc.priorityScore}</div>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[10px]">
+                <div className="rounded-lg bg-gray-950/60 p-2"><div className="text-gray-500">Severity</div><div className="mt-1 font-black text-orange-300">{inc.severity}</div></div>
+                <div className="rounded-lg bg-gray-950/60 p-2"><div className="text-gray-500">Trapped</div><div className="mt-1 font-black text-red-300">{inc.peopleTrapped || 0}</div></div>
+                <div className="rounded-lg bg-gray-950/60 p-2"><div className="text-gray-500">Status</div><div className="mt-1 truncate font-black text-blue-300">{inc.status.replaceAll('_', ' ')}</div></div>
+              </div>
+              <Link to={`/authority/incidents/${inc.id}`} onClick={() => setSelectedIncidentId(inc.id)} className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-500/40 bg-blue-600/20 text-xs font-black text-blue-200">
+                Open incident <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </article>
+          ))}
+        </div>
+
         {/* Incidents Table */}
-        <div className="bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="hidden bg-[#111827] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl md:block">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-gray-300">
               <thead className="bg-[#151e32] text-gray-400 font-mono uppercase text-[10px] tracking-wider border-b border-gray-800">

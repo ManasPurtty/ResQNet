@@ -8,7 +8,7 @@ export const ToastContainer = () => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none px-4">
+    <div className="fixed bottom-3 left-3 right-3 z-50 flex flex-col gap-3 pointer-events-none sm:bottom-5 sm:left-auto sm:right-5 sm:max-w-md sm:w-full sm:px-4">
       {toasts.map(toast => {
         let borderClass = 'border-blue-500/50 bg-slate-900/95 text-blue-100';
         let icon = <Info className="w-5 h-5 text-blue-400 shrink-0" />;

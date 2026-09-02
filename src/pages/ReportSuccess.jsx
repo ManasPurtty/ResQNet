@@ -43,8 +43,8 @@ export const ReportSuccess = () => {
     <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans">
       <CitizenNavbar />
 
-      <main className="flex-1 flex items-center justify-center p-4 py-8">
-        <div className="max-w-2xl w-full bg-[#111827] border border-gray-800 rounded-3xl p-6 sm:p-8 space-y-6 text-center shadow-2xl relative overflow-hidden">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-4 py-5 sm:py-8">
+        <div className="max-w-2xl w-full bg-[#111827] border border-gray-800 rounded-3xl p-4 sm:p-8 space-y-5 sm:space-y-6 text-center shadow-2xl relative overflow-hidden">
           <div className="w-16 h-16 rounded-2xl bg-emerald-950 border border-emerald-800 text-emerald-400 flex items-center justify-center mx-auto text-3xl shadow-xl shadow-emerald-500/10">
             <CheckCircle2 className="w-10 h-10" />
           </div>
@@ -63,22 +63,22 @@ export const ReportSuccess = () => {
 
           {/* Reference Card */}
           <div className="bg-[#151e32] border border-gray-800 rounded-2xl p-4 text-left space-y-2.5 font-mono text-xs">
-            <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+            <div className="flex flex-wrap justify-between items-center gap-2 border-b border-gray-800 pb-2">
               <span className="text-gray-400">Incident Reference:</span>
               <span className="font-black text-lg text-blue-400">{incident.id}</span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-gray-400">Location:</span>
-              <span className="text-gray-200">{incident.location.name}</span>
+              <span className="text-left text-gray-200 sm:text-right">{incident.location.name}</span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex flex-wrap justify-between items-center gap-2">
               <span className="text-gray-400">Computed Priority Score:</span>
               <span className="text-red-400 font-bold text-sm">{incident.priorityScore} / 100</span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex flex-wrap justify-between items-center gap-2">
               <span className="text-gray-400">Current Status:</span>
               <span className="bg-red-950 text-red-300 border border-red-800 text-[10px] px-2 py-0.5 rounded font-bold">
                 {incident.status || 'UNASSIGNED'}
@@ -119,7 +119,7 @@ export const ReportSuccess = () => {
           {/* USER'S DESIGNATED NEARBY EVACUATION SHELTER (GOVERNMENT SCHOOL) */}
           {nearestSchool && (
             <div className="bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-800/90 rounded-2xl p-4 text-left space-y-2 shadow-xl">
-              <div className="flex items-center justify-between border-b border-emerald-800/60 pb-1.5">
+              <div className="flex flex-col items-start gap-2 border-b border-emerald-800/60 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-1.5 font-heading font-bold text-xs text-emerald-300 uppercase tracking-wider">
                   <School className="w-4 h-4 text-emerald-400" />
                   <span>Your Nearest Designated Evacuation School Shelter</span>
@@ -136,14 +136,14 @@ export const ReportSuccess = () => {
                 <p className="text-[11px] text-gray-300">
                   📍 {nearestSchool.shelter.location.name}
                 </p>
-                <div className="flex items-center gap-4 text-[11px] text-emerald-300 font-mono pt-1">
+                <div className="flex flex-col gap-1 text-[11px] text-emerald-300 font-mono pt-1 sm:flex-row sm:flex-wrap sm:gap-4">
                   <span>Available Beds: <b>{nearestSchool.shelter.available}</b></span>
                   <span>Drinking Water & Kitchen Ready</span>
                 </div>
               </div>
 
               {nearestSchool.shelter.authorizedEmergencyContact && (
-                <div className="text-[10px] bg-[#0d1322] p-2 rounded-lg border border-emerald-900/60 flex items-center justify-between text-gray-300 font-mono">
+                <div className="text-[10px] bg-[#0d1322] p-2 rounded-lg border border-emerald-900/60 flex flex-col items-start gap-1 text-gray-300 font-mono sm:flex-row sm:items-center sm:justify-between">
                   <span>Contact: {nearestSchool.shelter.authorizedEmergencyContact.name}</span>
                   <span className="text-emerald-400 font-bold">{nearestSchool.shelter.authorizedEmergencyContact.phone}</span>
                 </div>

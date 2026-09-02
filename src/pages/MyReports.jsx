@@ -34,7 +34,7 @@ export const MyReports = () => {
     <div className="min-h-screen bg-[#090d16] text-gray-100 flex flex-col font-sans">
       <CitizenNavbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-5 sm:py-8 space-y-6 sm:space-y-8">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4">
           <div>
@@ -131,19 +131,19 @@ export const MyReports = () => {
                 return (
                   <div
                     key={inc.id}
-                    className="bg-[#111827] border border-gray-800 rounded-3xl p-6 space-y-5 shadow-xl hover:border-gray-700 transition-colors"
+                    className="bg-[#111827] border border-gray-800 rounded-3xl p-4 sm:p-6 space-y-5 shadow-xl hover:border-gray-700 transition-colors"
                   >
                     {/* Incident Header */}
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
                         <span className="font-mono font-black text-base text-blue-400 bg-blue-950 px-2.5 py-1 rounded border border-blue-800">
                           {inc.id}
                         </span>
-                        <div>
-                          <h3 className="font-heading font-bold text-base text-white">{inc.title}</h3>
+                        <div className="min-w-0">
+                          <h3 className="font-heading font-bold text-base leading-snug text-white">{inc.title}</h3>
                           <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
                             <MapPin className="w-3.5 h-3.5 text-red-400" />
-                            <span>{inc.location.name}</span>
+                            <span className="min-w-0 break-words">{inc.location.name}</span>
                           </p>
                         </div>
                       </div>

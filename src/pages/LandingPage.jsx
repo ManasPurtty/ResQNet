@@ -40,12 +40,12 @@ export const LandingPage = () => {
       {activeAlert && (
         <div className="bg-gradient-to-r from-red-950 via-red-900 to-orange-950 border-b border-red-800/80 px-4 py-2.5 text-xs font-mono">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-red-200">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-start sm:items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shrink-0"></span>
               <span className="font-bold text-white bg-red-800 px-2 py-0.5 rounded text-[10px] uppercase">
                 {activeAlert.severity} WARNING
               </span>
-              <span className="truncate font-semibold">{activeAlert.title}</span>
+              <span className="min-w-0 line-clamp-2 font-semibold sm:truncate">{activeAlert.title}</span>
             </div>
             <div className="flex items-center gap-4 text-[11px] text-red-300 shrink-0">
               <span>Region: <b className="text-white">{activeAlert.affectedRegion.split(',')[0]}</b></span>
@@ -58,11 +58,11 @@ export const LandingPage = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-8 sm:space-y-10">
         
         {/* Hero Section: Citizen Emergency Command */}
         <section className="space-y-6 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/90 border border-blue-800 text-blue-400 text-xs font-mono font-semibold shadow-lg">
+          <div className="inline-flex max-w-full items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/90 border border-blue-800 text-blue-400 text-[10px] sm:text-xs leading-relaxed text-center font-mono font-semibold shadow-lg">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -70,14 +70,14 @@ export const LandingPage = () => {
             ODISHA STATE REAL-TIME DISASTER & CITIZEN SAFETY NETWORK
           </div>
 
-          <h1 className="font-heading font-black text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1]">
+          <h1 className="font-heading font-black text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1]">
             Emergency Help & Nearby Evacuation Shelters.{' '}
             <span className="bg-gradient-to-r from-red-500 via-orange-400 to-blue-400 bg-clip-text text-transparent">
               Right at Your Location.
             </span>
           </h1>
 
-          <p className="text-gray-300 text-base sm:text-lg leading-relaxed font-normal">
+          <p className="text-gray-300 text-sm sm:text-lg leading-relaxed font-normal">
             Instantly detect nearest Government School Shelters, 108 Hospital Ambulances, and Fire Stations in your area. Report emergencies in 1-tap with automatic state coordination.
           </p>
 
@@ -85,7 +85,7 @@ export const LandingPage = () => {
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               to="/report"
-              className="px-8 py-4 rounded-2xl font-heading font-bold text-sm bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center gap-2.5 transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-4 sm:px-8 py-4 rounded-2xl font-heading font-bold text-xs sm:text-sm bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-2xl shadow-red-600/40 border border-red-400/30 transition-all flex items-center justify-center gap-2.5 text-center transform hover:-translate-y-0.5"
             >
               <AlertCircle className="w-5 h-5 animate-pulse" />
               <span>REPORT EMERGENCY (1-TAP SOS)</span>
@@ -93,7 +93,7 @@ export const LandingPage = () => {
 
             <Link
               to="/my-reports"
-              className="px-8 py-4 rounded-2xl font-heading font-bold text-sm bg-[#151e32] hover:bg-gray-800 text-white border border-gray-700 shadow-xl transition-all flex items-center gap-2.5 transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-4 sm:px-8 py-4 rounded-2xl font-heading font-bold text-xs sm:text-sm bg-[#151e32] hover:bg-gray-800 text-white border border-gray-700 shadow-xl transition-all flex items-center justify-center gap-2.5 text-center transform hover:-translate-y-0.5"
             >
               <FileText className="w-5 h-5 text-blue-400" />
               <span>TRACK MY REPORT ({myIncidents.length})</span>

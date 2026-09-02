@@ -25,7 +25,7 @@ export const AlertsPage = () => {
 
           <button
             onClick={simulateNewAlert}
-            className="px-4 py-2.5 rounded-xl font-heading font-bold text-xs bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30 border border-red-400/30 transition-all flex items-center gap-2"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-600 px-4 py-2.5 font-heading text-xs font-bold text-white shadow-lg shadow-red-600/30 transition-all hover:bg-red-500 sm:w-auto"
           >
             <PlusCircle className="w-4 h-4 animate-bounce" />
             <span>SIMULATE NEW ALERT</span>
@@ -41,9 +41,9 @@ export const AlertsPage = () => {
           </div>
 
           {/* Right Column (7 cols): Map Hazard Viewport */}
-          <div className="lg:col-span-7 h-[520px] rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative">
+          <div className="lg:col-span-7 h-[360px] sm:h-[520px] rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative">
             <CommandMap height="100%" interactive={true} />
-            <div className="absolute top-4 left-4 z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700/80 p-2.5 rounded-xl text-xs flex items-center gap-2 text-gray-200">
+            <div className="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-auto z-10 bg-[#151e32]/90 backdrop-blur-md border border-gray-700/80 p-2.5 rounded-xl text-[10px] sm:text-xs flex items-center gap-2 text-gray-200">
               <ShieldAlert className="w-4 h-4 text-red-500 animate-pulse" />
               <span className="font-mono font-bold">HAZARD RISK ZONE MAP VIEW</span>
             </div>

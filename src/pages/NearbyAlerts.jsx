@@ -28,22 +28,22 @@ export const NearbyAlerts = () => {
   return (
     <div className="min-h-screen bg-[#090d16] text-gray-100">
       <CitizenNavbar />
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-5xl space-y-5 px-3 py-5 sm:space-y-6 sm:px-4 sm:py-8">
         <div className="flex flex-col justify-between gap-4 border-b border-gray-800 pb-5 sm:flex-row sm:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-red-400">
               <Radio className="h-3.5 w-3.5 animate-pulse" /> Geo-targeted public safety network
             </div>
-            <h1 className="font-heading text-3xl font-black text-white">NEARBY EMERGENCY ALERTS</h1>
+            <h1 className="font-heading text-2xl font-black leading-tight text-white sm:text-3xl">NEARBY EMERGENCY ALERTS</h1>
             <p className="mt-1 max-w-2xl text-xs leading-relaxed text-gray-400">
               Warnings created from verified citizen reports and authority feeds are stored in MongoDB and delivered to users inside the affected radius.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex">
             <button
               type="button"
               onClick={refreshNotifications}
-              className="flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-900 px-3 py-2 text-xs font-bold text-gray-200 hover:bg-gray-800"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-900 px-3 py-2 text-xs font-bold text-gray-200 hover:bg-gray-800"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
@@ -51,7 +51,7 @@ export const NearbyAlerts = () => {
               <button
                 type="button"
                 onClick={markAllNotificationsRead}
-                className="flex items-center gap-2 rounded-xl border border-emerald-800 bg-emerald-950 px-3 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-800 bg-emerald-950 px-3 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900"
               >
                 <CheckCheck className="h-3.5 w-3.5" /> Mark all read
               </button>
@@ -102,7 +102,7 @@ export const NearbyAlerts = () => {
           ) : notifications.map(notification => (
             <article
               key={notification.id}
-              className={`rounded-2xl border p-5 ${severityStyles[notification.severity] || severityStyles.INFO} ${notification.readAt ? 'opacity-65' : 'shadow-lg'}`}
+              className={`rounded-2xl border p-4 sm:p-5 ${severityStyles[notification.severity] || severityStyles.INFO} ${notification.readAt ? 'opacity-65' : 'shadow-lg'}`}
             >
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                 <div className="min-w-0">

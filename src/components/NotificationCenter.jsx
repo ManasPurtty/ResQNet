@@ -43,7 +43,7 @@ export const NotificationCenter = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[min(92vw,24rem)] overflow-hidden rounded-2xl border border-gray-700 bg-[#0d1423] shadow-2xl shadow-black/50">
+        <div className="fixed left-3 right-3 top-[4.5rem] z-50 w-auto overflow-hidden rounded-2xl border border-gray-700 bg-[#0d1423] shadow-2xl shadow-black/50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,24rem)]">
           <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
             <div>
               <div className="flex items-center gap-2 text-sm font-bold text-white">
