@@ -6,12 +6,14 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { connectDB, getDbStatus, inMemoryUsers } from './config/db.js';
 import { seedDemoAdmin } from './config/seedDemoAdmin.js';
+import { seedFloodIntelligence } from './config/seedFloodIntelligence.js';
 import { User } from './models/User.js';
 import apiRouter from './routes/api.js';
 import routeOptimizationRouter from './routes/routeOptimization.js';
 import authRouter from './routes/auth.js';
 import reportsRouter from './routes/reports.js';
 import communityAlertsRouter from './routes/communityAlerts.js';
+import floodIntelligenceRouter from './routes/floodIntelligence.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -123,6 +125,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/community-alerts', communityAlertsRouter);
+app.use('/api/flood-intelligence', floodIntelligenceRouter);
 app.use('/api', apiRouter);
 app.use('/api/routes', routeOptimizationRouter);
 
@@ -134,8 +137,9 @@ const startServer = async () => {
   if (connection) {
     try {
       await seedDemoAdmin();
+      await seedFloodIntelligence();
     } catch (error) {
-      console.error(`Demo admin seed failed: ${error.message}`);
+      console.error(`Startup data seed failed: ${error.message}`);
     }
   }
 

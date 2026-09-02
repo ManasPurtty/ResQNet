@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertTriangle, BellRing, CheckCheck, MapPin, Navigation, Radio, RefreshCw, ShieldCheck } from 'lucide-react';
 import { CitizenNavbar } from '../components/CitizenNavbar';
 import { useAppState } from '../context/StateContext';
+import { SafetyCheckInPanel } from '../components/SafetyCheckInPanel';
 
 const severityStyles = {
   CRITICAL: 'border-red-700 bg-red-950/55 text-red-200',
@@ -81,6 +82,8 @@ export const NearbyAlerts = () => {
             <span className="text-xs font-black">{nearbyAlertsEnabled ? 'UPDATE MY LOCATION' : 'ENABLE NEARBY ALERTS'}</span>
           </button>
         </section>
+
+        <SafetyCheckInPanel />
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">

@@ -1,5 +1,7 @@
 import express from 'express';
 import { ODISHA_ROAD_HAZARDS, ODISHA_HAZARD_ZONE_POLYGON } from '../data/odishaData.js';
+import { getDbStatus } from '../config/db.js';
+import { InfrastructureAsset } from '../models/InfrastructureAsset.js';
 
 const router = express.Router();
 
@@ -90,13 +92,18 @@ async function fetchOsrmRoute(origin, destination) {
 }
 
 // Evaluate hazard proximity and score a given route geometry
-function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', hazardRadiusMeters = 350) {
+export function evaluateRouteHazards(
+  geometryCoordinates,
+  vehicleType = 'AMBULANCE',
+  hazardRadiusMeters = 350,
+  roadHazards = ODISHA_ROAD_HAZARDS
+) {
   let penaltyTotal = 0;
   const hazardsNearRoute = [];
   const hazardsAvoided = [];
   let isBlocked = false;
 
-  ODISHA_ROAD_HAZARDS.forEach(hazard => {
+  roadHazards.forEach(hazard => {
     let minDistance = Infinity;
 
     // Check distance between hazard point and each segment of the route
@@ -121,7 +128,11 @@ function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', ha
       let weight = 0;
       let blockedForVehicle = false;
 
-      if (hazard.type === 'BLOCKED_ROAD') {
+      if (hazard.blocksRoute && !hazard.passableForVehicles?.includes(vehicleType)) {
+        weight = 100;
+        blockedForVehicle = true;
+        isBlocked = true;
+      } else if (hazard.type === 'BLOCKED_ROAD') {
         if (vehicleType === 'RESCUE_TEAM') {
           weight = 35; // Rescue teams have hydraulic extrication/chainsaws
         } else {
@@ -132,11 +143,11 @@ function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', ha
       } else if (hazard.type === 'FLOOD_ROAD') {
         if (vehicleType === 'AMBULANCE') weight = 45; // Ambulance strongly avoids flood
         else if (vehicleType === 'RESCUE_TEAM') weight = 15; // Boat/ODRAF team can traverse
-        else if (vehicleType === 'RELIEF_TRUCK') weight = 50; // Heavy truck risks stall
+        else if (['RELIEF_TRUCK', 'RELIEF_VEHICLE'].includes(vehicleType)) weight = 50; // Heavy truck risks stall
       } else if (hazard.type === 'LANDSLIDE_ROAD') {
         if (vehicleType === 'AMBULANCE') weight = 50;
         else if (vehicleType === 'RESCUE_TEAM') weight = 20;
-        else if (vehicleType === 'RELIEF_TRUCK') weight = 40;
+        else if (['RELIEF_TRUCK', 'RELIEF_VEHICLE'].includes(vehicleType)) weight = 40;
       } else {
         weight = 10; // High risk zone
       }
@@ -149,6 +160,8 @@ function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', ha
         severity: hazard.severity,
         distanceMeters: Math.round(minDistance),
         blockedForVehicle,
+        dynamicInfrastructure: Boolean(hazard.dynamicInfrastructure),
+        infrastructureStatus: hazard.infrastructureStatus || null,
         description: hazard.description
       });
     } else {
@@ -156,6 +169,8 @@ function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', ha
         id: hazard.id,
         name: hazard.name,
         type: hazard.type,
+        dynamicInfrastructure: Boolean(hazard.dynamicInfrastructure),
+        infrastructureStatus: hazard.infrastructureStatus || null,
         distanceMeters: Math.round(minDistance)
       });
     }
@@ -178,6 +193,48 @@ function evaluateRouteHazards(geometryCoordinates, vehicleType = 'AMBULANCE', ha
   };
 }
 
+export const infrastructureAssetToHazard = asset => {
+  if (!asset || asset.status === 'OPERATIONAL') return null;
+  const coordinates = asset.location?.coordinates;
+  if (!Array.isArray(coordinates) || coordinates.length !== 2) return null;
+
+  const fullyClosed = ['WASHED_OUT', 'CLOSED'].includes(asset.status);
+  const flooded = asset.status === 'FLOODED';
+  return {
+    id: asset.assetId,
+    name: asset.name,
+    type: fullyClosed ? 'BLOCKED_ROAD' : flooded ? 'FLOOD_ROAD' : 'HIGH_RISK_ZONE',
+    severity: fullyClosed || flooded ? 'CRITICAL' : 'HIGH',
+    radiusMeters: asset.routeRadiusMeters || 450,
+    location: {
+      lat: coordinates[1],
+      lng: coordinates[0],
+      name: asset.name
+    },
+    description: `${asset.description || 'Infrastructure disruption'} Current status: ${asset.status}.`,
+    blocksRoute: fullyClosed || flooded,
+    passableForVehicles: flooded ? ['RESCUE_TEAM'] : [],
+    dynamicInfrastructure: true,
+    infrastructureStatus: asset.status
+  };
+};
+
+const loadRoadHazards = async () => {
+  if (!getDbStatus()) return ODISHA_ROAD_HAZARDS;
+  try {
+    const assets = await InfrastructureAsset.find({ status: { $ne: 'OPERATIONAL' } });
+    const infrastructureHazards = assets.map(infrastructureAssetToHazard).filter(Boolean);
+    const dynamicIds = new Set(infrastructureHazards.map(hazard => hazard.id));
+    return [
+      ...ODISHA_ROAD_HAZARDS.filter(hazard => !dynamicIds.has(hazard.id)),
+      ...infrastructureHazards
+    ];
+  } catch (error) {
+    console.error('Load dynamic infrastructure hazards error:', error);
+    return ODISHA_ROAD_HAZARDS;
+  }
+};
+
 // POST /api/routes/optimize
 router.post('/optimize', async (req, res) => {
   try {
@@ -198,6 +255,7 @@ router.post('/optimize', async (req, res) => {
 
     // Straight-line distance in km
     const directDistanceKm = calculateDistanceMeters(origin.lat, origin.lng, destination.lat, destination.lng) / 1000;
+    const activeRoadHazards = avoid_hazards ? await loadRoadHazards() : [];
 
     // Try fetching from real OSRM driving engine
     let osrmRoutes = await fetchOsrmRoute(origin, destination);
@@ -210,7 +268,7 @@ router.post('/optimize', async (req, res) => {
         const distanceKm = Math.round((osrmRoute.distance / 1000) * 10) / 10;
         const durationMin = Math.max(3, Math.round(osrmRoute.duration / 60));
         
-        const evaluation = evaluateRouteHazards(coords, vehicle_type, hazard_radius_meters);
+        const evaluation = evaluateRouteHazards(coords, vehicle_type, hazard_radius_meters, activeRoadHazards);
 
         candidateRoutes.push({
           routeIndex: index,
@@ -241,7 +299,7 @@ router.post('/optimize', async (req, res) => {
         const speedKmh = vehicle_type === 'AMBULANCE' ? 42 : vehicle_type === 'RESCUE_TEAM' ? 36 : 30;
         const durationMin = Math.max(4, Math.round((distanceKm / speedKmh) * 60) + 3);
 
-        const evaluation = evaluateRouteHazards(synthGeo, vehicle_type, hazard_radius_meters);
+        const evaluation = evaluateRouteHazards(synthGeo, vehicle_type, hazard_radius_meters, activeRoadHazards);
 
         candidateRoutes.push({
           routeIndex: candidateRoutes.length,
@@ -319,6 +377,8 @@ router.post('/optimize', async (req, res) => {
       },
       hazards_avoided_count: recommendedRoute.hazards_avoided.length,
       hazards_near_route_count: recommendedRoute.hazards_near_route.length,
+      infrastructure_closures_avoided: recommendedRoute.hazards_avoided.filter(hazard => hazard.dynamicInfrastructure),
+      infrastructure_closures_near_route: recommendedRoute.hazards_near_route.filter(hazard => hazard.dynamicInfrastructure),
       calculated_at: new Date().toISOString()
     });
 
@@ -332,11 +392,12 @@ router.post('/optimize', async (req, res) => {
 });
 
 // GET /api/routes/hazards - Return all active road hazards
-router.get('/hazards', (req, res) => {
+router.get('/hazards', async (req, res) => {
+  const hazards = await loadRoadHazards();
   return res.json({
     success: true,
-    count: ODISHA_ROAD_HAZARDS.length,
-    hazards: ODISHA_ROAD_HAZARDS,
+    count: hazards.length,
+    hazards,
     hazard_zone_polygon: ODISHA_HAZARD_ZONE_POLYGON
   });
 });

@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import { buildCommunityWarning, getAlertRadiusKm, getSafetyInstructions } from '../services/communityAlertService.js';
 import { geoPoint, haversineDistanceKm, isValidCoordinate } from '../utils/geo.js';
 import { IncidentCluster } from '../models/IncidentCluster.js';
+import {
+  buildDownstreamArrivalZones,
+  calculateFloodRisk,
+  estimateDangerLeadMinutes
+} from '../services/floodPredictionService.js';
+import { evaluateRouteHazards, infrastructureAssetToHazard } from '../routes/routeOptimization.js';
 
 test('calculates nearby distance accurately enough for alert matching', () => {
   const distance = haversineDistanceKm(
@@ -53,4 +59,51 @@ test('serializes MongoDB incident clusters for the existing frontend map', () =>
     district: 'Khordha',
     address: ''
   });
+});
+
+test('predicts a critical rising river and downstream arrival windows', () => {
+  const station = {
+    currentLevelM: 26.58,
+    warningLevelM: 26.41,
+    dangerLevelM: 26.92,
+    riseRateMetersPerHour: 0.52,
+    rainfall24hMm: 176,
+    trend: 'RISING_RAPIDLY',
+    waveSpeedKmh: 24,
+    downstreamCommunities: [{
+      zoneId: 'ZONE-1',
+      name: 'Downstream village',
+      district: 'Khordha',
+      location: geoPoint(20.33, 85.89),
+      distanceKm: 15,
+      radiusKm: 7,
+      population: 18000,
+      households: 4000
+    }]
+  };
+
+  assert.deepEqual(calculateFloodRisk(station), {
+    risk: 'CRITICAL',
+    stage: 'WARNING',
+    confidenceScore: 98
+  });
+  assert.equal(estimateDangerLeadMinutes(station), 40);
+  assert.equal(buildDownstreamArrivalZones(station, new Date('2026-09-02T00:00:00Z'))[0].arrivalMinutes, 78);
+});
+
+test('turns a flooded bridge into a vehicle-aware routing closure', () => {
+  const hazard = infrastructureAssetToHazard({
+    assetId: 'BRIDGE-1',
+    name: 'Flooded bridge',
+    type: 'BRIDGE',
+    status: 'FLOODED',
+    routeRadiusMeters: 600,
+    location: geoPoint(20.28, 85.86),
+    description: 'Deck inundated'
+  });
+  const geometry = [[85.85, 20.27], [85.87, 20.29]];
+
+  assert.equal(hazard.dynamicInfrastructure, true);
+  assert.equal(evaluateRouteHazards(geometry, 'AMBULANCE', 350, [hazard]).isBlocked, true);
+  assert.equal(evaluateRouteHazards(geometry, 'RESCUE_TEAM', 350, [hazard]).isBlocked, false);
 });

@@ -39,6 +39,7 @@ ResQNet visually and algorithmically answers the five critical questions emergen
 - **Nearby Emergency Alerts (`/nearby-alerts`)**: Permission-based GPS registration, persistent notification history, browser alerts, safety instructions, distance from the hazard, and acknowledgement controls.
 - **Automatic Community Warning**: A submitted flood, cyclone, fire, landslide, or other emergency creates a geofenced warning and notifies every registered user whose saved location is inside the calculated safety radius.
 - **Duplicate Incident Fusion**: Same-type reports within 2.5 km and three hours are merged into one incident cluster; report count, confidence, priority, and alert messaging update automatically.
+- **Safe / Need Rescue Check-In**: Citizens can account for everyone with them against an active flood warning. Rescue requests include household and vulnerable-person counts plus the citizen's saved opt-in location.
 
 ### 🏢 Authority Emergency Operations Center (EOC)
 - **Command Center Dashboard (`/authority/dashboard`)**:
@@ -53,6 +54,12 @@ ResQNet visually and algorithmically answers the five critical questions emergen
   - **SMS / IVR Fallback Feed**: Ingests low-connectivity SMS and IVR reports with one-click incident conversion.
   - **MongoDB Responder Tracking**: Authority users update `ASSIGNED`, `EN ROUTE`, `ARRIVED`, `RESCUE IN PROGRESS`, and `COMPLETED`; reporters receive persisted real-time updates and ETA changes.
   - **Official Community Broadcast**: The alert simulation publishes an authority/IMD-style geofenced warning to MongoDB and records how many nearby users were notified.
+- **River-to-Rescue Intelligence (`/authority/flood-intelligence`)**:
+  - Computes risk, threshold stage, confidence, and danger lead time from water level, rise rate, rainfall, and trend.
+  - Predicts downstream community arrival windows and maps each impact radius, population, and priority shelter.
+  - Stores road and bridge condition in MongoDB; `FLOODED`, `WASHED OUT`, and `CLOSED` assets immediately affect vehicle-aware emergency route scoring.
+  - Displays real-time `SAFE` and `NEED RESCUE` household acknowledgements for command-centre prioritization.
+  - Includes a clearly labelled demo river sensor and simulation trigger. Replace it with a verified hydrology feed before field use.
 - **Directory & Resource Pages**:
   - **Incidents Directory (`/authority/incidents`)**: Filterable table view of all active incidents.
   - **Resource Management (`/authority/resources`)**: Status controls (`AVAILABLE`, `ASSIGNED`, `BUSY`, `UNAVAILABLE`), capacity meters, and capability tags.
@@ -78,6 +85,10 @@ Authority login route: `/authority/login`
 - `incidentreports`: each citizen's original report linked to its incident cluster.
 - `communityalerts`: geofenced citizen/IMD/NDMA/authority warnings, safety guidance, radius, expiry, and recipient count.
 - `usernotifications`: one persistent delivery record per recipient and alert, including distance and read status.
+- `riverstations`: gauge thresholds, observed levels, rainfall, trends, downstream communities, and data-source metadata.
+- `floodforecasts`: calculated danger lead time, confidence, downstream arrival zones, exposed population, alert linkage, and expiry.
+- `infrastructureassets`: live status of roads, bridges, shelters, hospitals, towers, and substations used by route planning.
+- `safetycheckins`: one updatable `SAFE` or `NEED_RESCUE` household response per user and warning.
 
 The browser receives Socket.IO events only as a refresh signal. Authorization and recipient isolation are enforced again when notification records are fetched from the API.
 
@@ -92,7 +103,7 @@ The browser receives Socket.IO events only as a refresh signal. Authorization an
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/saurav-pal231/ResQNet.git
+git clone https://github.com/ManasPurtty/ResQNet.git
 
 # Navigate into project directory
 cd ResQNet
@@ -100,11 +111,21 @@ cd ResQNet
 # Install dependencies
 npm install
 
-# Start local development server
-npm run dev
+# Start frontend and backend together
+npm run dev:all
 ```
 
 Open `http://localhost:3000` in your browser.
+
+The backend runs at `http://localhost:5050`. Add `MONGODB_URI`, `JWT_SECRET`, and optional `CLIENT_URLS` values to `.env`. If Atlas rejects a local connection, add the laptop's current IP under Atlas **Network Access**; MongoDB-dependent alerts, forecasts, and check-ins intentionally return `503` instead of silently losing emergency data.
+
+### Flood Intelligence API
+
+- `GET /api/flood-intelligence/active` — active forecasts for an authenticated user.
+- `GET /api/flood-intelligence/dashboard` — authority river, forecast, infrastructure, and safety-accountability view.
+- `POST /api/flood-intelligence/simulate` — authority-only rapid-rise demo stored in MongoDB.
+- `POST /api/flood-intelligence/check-ins` — persistent citizen `SAFE` / `NEED_RESCUE` acknowledgement.
+- `PATCH /api/flood-intelligence/infrastructure/:assetId/status` — authority status update consumed by the route optimizer.
 
 ### Frontend Deployment
 

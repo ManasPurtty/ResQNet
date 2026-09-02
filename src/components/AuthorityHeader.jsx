@@ -16,7 +16,8 @@ import {
   BarChart3,
   LogOut,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Waves
 } from 'lucide-react';
 
 export const AuthorityHeader = () => {
@@ -52,6 +53,7 @@ export const AuthorityHeader = () => {
   const navItems = [
     { label: 'EOC Dashboard', path: '/authority/dashboard', icon: LayoutDashboard },
     { label: 'Incidents', path: '/authority/incidents', icon: Layers },
+    { label: 'Flood Intel', path: '/authority/flood-intelligence', icon: Waves },
     { label: 'Resources', path: '/authority/resources', icon: Truck },
     { label: 'Shelters', path: '/authority/shelters', icon: Home },
     { label: 'Alerts', path: '/authority/alerts', icon: AlertTriangle, badge: alerts.length },

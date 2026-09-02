@@ -18,6 +18,7 @@ import { AlertsPage } from './pages/AlertsPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { NearbyAlerts } from './pages/NearbyAlerts';
 import { NearbyEmergencyBanner } from './components/NearbyEmergencyBanner';
+import { FloodIntelligencePage } from './pages/FloodIntelligencePage';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/authority/dashboard" element={<AuthorityDashboard />} />
           <Route path="/authority/incidents" element={<IncidentsPage />} />
           <Route path="/authority/incidents/:id" element={<IncidentDetailPage />} />
+          <Route path="/authority/flood-intelligence" element={<RequireAuth><FloodIntelligencePage /></RequireAuth>} />
           <Route path="/authority/resources" element={<ResourcesPage />} />
           <Route path="/authority/shelters" element={<SheltersPage />} />
           <Route path="/authority/alerts" element={<AlertsPage />} />

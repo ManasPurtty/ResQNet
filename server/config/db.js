@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { DEMO_ADMIN } from '../../shared/demoCredentials.js';
 
 let isMongoConnected = false;
 
@@ -7,13 +8,13 @@ let isMongoConnected = false;
 export const inMemoryUsers = [
   {
     _id: 'usr_admin_001',
-    name: 'Odisha State EOC Commander',
-    email: 'admin@resqnet.gov.in',
-    phone: '+91 94370 10100',
-    passwordHash: bcrypt.hashSync('admin123', 10),
-    role: 'ADMIN',
-    district: 'Khordha',
-    badgeNumber: 'OSDMA-EOC-01',
+    name: DEMO_ADMIN.name,
+    email: DEMO_ADMIN.email,
+    phone: DEMO_ADMIN.phone,
+    passwordHash: bcrypt.hashSync(DEMO_ADMIN.password, 10),
+    role: DEMO_ADMIN.role,
+    district: DEMO_ADMIN.district,
+    badgeNumber: DEMO_ADMIN.badgeNumber,
     createdAt: new Date().toISOString()
   },
   {

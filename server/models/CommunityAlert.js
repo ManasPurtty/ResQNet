@@ -14,7 +14,7 @@ const CommunityAlertSchema = new mongoose.Schema({
   clusterId: { type: String, default: null, index: true },
   source: {
     type: String,
-    enum: ['CITIZEN_REPORT', 'IMD', 'NDMA_SACHET', 'OSDMA', 'AUTHORITY'],
+    enum: ['CITIZEN_REPORT', 'IMD', 'NDMA_SACHET', 'OSDMA', 'AUTHORITY', 'RIVER_SENSOR'],
     default: 'CITIZEN_REPORT'
   },
   type: { type: String, required: true },

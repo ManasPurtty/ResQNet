@@ -111,6 +111,7 @@ export const StateProvider = ({ children }) => {
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
   );
+  const [floodIntelligenceRevision, setFloodIntelligenceRevision] = useState(0);
   const notificationIdsRef = useRef(new Set());
   const notificationsLoadedRef = useRef(false);
   const socketRef = useRef(null);
@@ -337,17 +338,25 @@ export const StateProvider = ({ children }) => {
       refreshMyReports();
       refreshAuthorityIncidents();
     };
+    const handleFloodIntelligenceUpdate = () => {
+      setFloodIntelligenceRevision(previous => previous + 1);
+      refreshNotifications();
+    };
 
     socket.on('community-alert-created', handleCommunityAlert);
     socket.on('notifications-synced', handleCommunityAlert);
     socket.on('incident-response-updated', handleResponseUpdate);
     socket.on('incident-created', refreshAuthorityIncidents);
+    socket.on('flood-intelligence-updated', handleFloodIntelligenceUpdate);
+    socket.on('safety-check-in-updated', handleFloodIntelligenceUpdate);
 
     return () => {
       socket.off('community-alert-created', handleCommunityAlert);
       socket.off('notifications-synced', handleCommunityAlert);
       socket.off('incident-response-updated', handleResponseUpdate);
       socket.off('incident-created', refreshAuthorityIncidents);
+      socket.off('flood-intelligence-updated', handleFloodIntelligenceUpdate);
+      socket.off('safety-check-in-updated', handleFloodIntelligenceUpdate);
       socket.disconnect();
       if (socketRef.current === socket) socketRef.current = null;
     };
@@ -982,6 +991,7 @@ export const StateProvider = ({ children }) => {
         alertLocationStatus,
         notificationPermission,
         enableNearbyAlerts,
+        floodIntelligenceRevision,
         refreshAuthorityIncidents,
         // Route Optimization Exports
         routeOrigin,
