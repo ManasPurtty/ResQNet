@@ -16,6 +16,8 @@ import { ResourcesPage } from './pages/ResourcesPage';
 import { SheltersPage } from './pages/SheltersPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { NearbyAlerts } from './pages/NearbyAlerts';
+import { NearbyEmergencyBanner } from './components/NearbyEmergencyBanner';
 
 export default function App() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
           <Route path="/report" element={<RequireAuth><ReportEmergency /></RequireAuth>} />
           <Route path="/report/success" element={<RequireAuth><ReportSuccess /></RequireAuth>} />
           <Route path="/my-reports" element={<RequireAuth><MyReports /></RequireAuth>} />
+          <Route path="/nearby-alerts" element={<RequireAuth><NearbyAlerts /></RequireAuth>} />
 
           {/* Authority Routes */}
           <Route path="/authority/login" element={<AuthorityLogin />} />
@@ -41,6 +44,7 @@ export default function App() {
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <NearbyEmergencyBanner />
         <ToastContainer />
       </BrowserRouter>
     </StateProvider>

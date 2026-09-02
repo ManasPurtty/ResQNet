@@ -36,6 +36,9 @@ ResQNet visually and algorithmically answers the five critical questions emergen
 - **Emergency Reporting (`/report`)**: Simple 6-step guided filing with browser GPS auto-detection, emergency type grid (Flood, Cyclone, Landslide, Building Collapse, Road Blockage, Medical, Fire), severity selection, trapped/vulnerable population counters, photo upload preview, description text area, and AI assistant auto-tagging preview.
 - **Report Tracking (`/my-reports`)**: Real-time progress timeline (`Report received` → `Authority notified` → `Rescue team assigned` → `Rescue in progress` → `Completed`).
 - **Confirmation Screen (`/report/success`)**: Provides unique Incident Reference (`INC-1024`), computed priority score, initial status, and direct tracking buttons.
+- **Nearby Emergency Alerts (`/nearby-alerts`)**: Permission-based GPS registration, persistent notification history, browser alerts, safety instructions, distance from the hazard, and acknowledgement controls.
+- **Automatic Community Warning**: A submitted flood, cyclone, fire, landslide, or other emergency creates a geofenced warning and notifies every registered user whose saved location is inside the calculated safety radius.
+- **Duplicate Incident Fusion**: Same-type reports within 2.5 km and three hours are merged into one incident cluster; report count, confidence, priority, and alert messaging update automatically.
 
 ### 🏢 Authority Emergency Operations Center (EOC)
 - **Command Center Dashboard (`/authority/dashboard`)**:
@@ -48,6 +51,8 @@ ResQNet visually and algorithmically answers the five critical questions emergen
   - **One-Click Deployment**: `ASSIGN TEAM` button updates team status to `ASSIGNED`, plots route polyline on map, and triggers toast notifications.
   - **Shelter Recommendation**: Recommends nearest shelter matching free capacity and medical/food facilities with `ASSIGN SHELTER` action.
   - **SMS / IVR Fallback Feed**: Ingests low-connectivity SMS and IVR reports with one-click incident conversion.
+  - **MongoDB Responder Tracking**: Authority users update `ASSIGNED`, `EN ROUTE`, `ARRIVED`, `RESCUE IN PROGRESS`, and `COMPLETED`; reporters receive persisted real-time updates and ETA changes.
+  - **Official Community Broadcast**: The alert simulation publishes an authority/IMD-style geofenced warning to MongoDB and records how many nearby users were notified.
 - **Directory & Resource Pages**:
   - **Incidents Directory (`/authority/incidents`)**: Filterable table view of all active incidents.
   - **Resource Management (`/authority/resources`)**: Status controls (`AVAILABLE`, `ASSIGNED`, `BUSY`, `UNAVAILABLE`), capacity meters, and capability tags.
@@ -63,6 +68,18 @@ Authority login route: `/authority/login`
 
 - **Email**: `resqnet.demo.admin@gmail.com`
 - **Password**: `Admin@123`
+
+---
+
+## 🗃️ MongoDB Alert Collections
+
+- `users`: authentication, roles, opt-in last-known GeoJSON location, and notification radius.
+- `incidentclusters`: fused incidents, report confidence, priority, resource assignment, ETA, and responder progress.
+- `incidentreports`: each citizen's original report linked to its incident cluster.
+- `communityalerts`: geofenced citizen/IMD/NDMA/authority warnings, safety guidance, radius, expiry, and recipient count.
+- `usernotifications`: one persistent delivery record per recipient and alert, including distance and read status.
+
+The browser receives Socket.IO events only as a refresh signal. Authorization and recipient isolation are enforced again when notification records are fetched from the API.
 
 ---
 

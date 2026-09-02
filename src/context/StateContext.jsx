@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { io as createSocket } from 'socket.io-client';
 import {
   INITIAL_INCIDENTS,
   INITIAL_RESOURCES,
@@ -20,8 +21,11 @@ import {
 import { optimizeEmergencyRoute } from '../services/routeOptimizationEngine';
 import { authService } from '../services/authService';
 import { reportService } from '../services/reportService';
+import { notificationService } from '../services/notificationService';
+import { API_ORIGIN } from '../config/api';
 
 const StateContext = createContext();
+const AUTHORITY_ROLES = new Set(['ADMIN', 'AUTHORITY', 'RESCUE_LEAD']);
 
 // Helper to play Web Audio API emergency chime
 const playAudioBeep = (freq = 880, duration = 0.2) => {
@@ -98,6 +102,18 @@ export const StateProvider = ({ children }) => {
   const [myIncidents, setMyIncidents] = useState([]);
   const [reportsLoading, setReportsLoading] = useState(false);
   const [reportsError, setReportsError] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [nearbyAlertsEnabled, setNearbyAlertsEnabled] = useState(Boolean(currentUser?.lastKnownLocation));
+  const [alertLocationStatus, setAlertLocationStatus] = useState(
+    currentUser?.lastKnownLocation ? 'Location active' : 'Location not enabled'
+  );
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
+  );
+  const notificationIdsRef = useRef(new Set());
+  const notificationsLoadedRef = useRef(false);
+  const socketRef = useRef(null);
 
   const addToast = (title, message, type = 'info') => {
     const id = Date.now() + Math.random();
@@ -112,6 +128,149 @@ export const StateProvider = ({ children }) => {
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
+
+  const showBrowserNotification = notification => {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+
+    const browserNotification = new Notification(notification.title, {
+      body: notification.message,
+      icon: '/favicon.svg',
+      tag: notification.entityId
+    });
+    browserNotification.onclick = () => {
+      window.focus();
+      window.location.assign('/nearby-alerts');
+    };
+  };
+
+  const refreshNotifications = useCallback(async () => {
+    if (!currentUser || !authService.getToken()) {
+      setNotifications([]);
+      setUnreadNotificationCount(0);
+      notificationIdsRef.current = new Set();
+      notificationsLoadedRef.current = false;
+      return [];
+    }
+
+    try {
+      const data = await notificationService.getNotifications();
+      const nextNotifications = data.notifications || [];
+      const freshUnread = nextNotifications.filter(notification => (
+        !notification.readAt && !notificationIdsRef.current.has(notification.id)
+      ));
+
+      setNotifications(nextNotifications);
+      setUnreadNotificationCount(data.unreadCount || 0);
+
+      if (notificationsLoadedRef.current && freshUnread[0]) {
+        showBrowserNotification(freshUnread[0]);
+        addToast(freshUnread[0].title, freshUnread[0].message, 'critical');
+      }
+
+      notificationIdsRef.current = new Set(nextNotifications.map(notification => notification.id));
+      notificationsLoadedRef.current = true;
+      return nextNotifications;
+    } catch (error) {
+      if (error.status === 401) setCurrentUser(null);
+      return [];
+    }
+  }, [currentUser]);
+
+  const enableNearbyAlerts = async () => {
+    if (!currentUser || !authService.getToken()) {
+      addToast('Login Required', 'Log in before enabling nearby emergency alerts.', 'alert');
+      return false;
+    }
+
+    if (!navigator.geolocation) {
+      setAlertLocationStatus('GPS is not supported by this browser');
+      addToast('Location Unsupported', 'This browser cannot share a GPS location.', 'alert');
+      return false;
+    }
+
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        setNotificationPermission(permission);
+      }
+
+      setAlertLocationStatus('Detecting your current area...');
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 60000
+        });
+      });
+
+      const result = await authService.updateLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        accuracyMeters: position.coords.accuracy,
+        alertRadiusKm: 15
+      });
+
+      setCurrentUser(authService.getUser());
+      setNearbyAlertsEnabled(true);
+      setAlertLocationStatus(`Active within 15 km · ±${Math.round(position.coords.accuracy)} m`);
+      await refreshNotifications();
+      addToast(
+        'Nearby Alerts Enabled',
+        result.notificationsSynced > 0
+          ? `${result.notificationsSynced} active warning(s) found near you.`
+          : 'You will now receive warnings reported near your current area.',
+        'success'
+      );
+      return true;
+    } catch (error) {
+      const message = error.code === 1
+        ? 'Location permission was denied. Enable it in your browser settings to receive nearby warnings.'
+        : error.message || 'Your current location could not be saved.';
+      setAlertLocationStatus('Location permission required');
+      addToast('Nearby Alerts Not Enabled', message, 'alert');
+      return false;
+    }
+  };
+
+  const markNotificationRead = async notificationId => {
+    try {
+      await notificationService.markRead(notificationId);
+      setNotifications(previous => previous.map(notification => (
+        notification.id === notificationId
+          ? { ...notification, readAt: new Date().toISOString() }
+          : notification
+      )));
+      setUnreadNotificationCount(previous => Math.max(0, previous - 1));
+    } catch (error) {
+      addToast('Alert Update Failed', error.message, 'alert');
+    }
+  };
+
+  const markAllNotificationsRead = async () => {
+    try {
+      await notificationService.markAllRead();
+      const readAt = new Date().toISOString();
+      setNotifications(previous => previous.map(notification => ({ ...notification, readAt })));
+      setUnreadNotificationCount(0);
+    } catch (error) {
+      addToast('Alert Update Failed', error.message, 'alert');
+    }
+  };
+
+  const refreshAuthorityIncidents = useCallback(async () => {
+    if (!AUTHORITY_ROLES.has(currentUser?.role) || !authService.getToken()) return [];
+
+    try {
+      const databaseIncidents = await reportService.getIncidentClusters();
+      setIncidents(previous => {
+        const databaseIds = new Set(databaseIncidents.map(incident => incident.id));
+        return [...databaseIncidents, ...previous.filter(incident => !databaseIds.has(incident.id))];
+      });
+      return databaseIncidents;
+    } catch {
+      return [];
+    }
+  }, [currentUser]);
 
   const refreshMyReports = useCallback(async () => {
     if (!currentUser || !authService.getToken()) {
@@ -143,6 +302,56 @@ export const StateProvider = ({ children }) => {
   useEffect(() => {
     refreshMyReports();
   }, [refreshMyReports]);
+
+  useEffect(() => {
+    refreshNotifications();
+    refreshAuthorityIncidents();
+
+    if (!currentUser) {
+      setNearbyAlertsEnabled(false);
+      setAlertLocationStatus('Location not enabled');
+      return;
+    }
+
+    setNearbyAlertsEnabled(Boolean(currentUser.lastKnownLocation));
+    if (currentUser.lastKnownLocation) setAlertLocationStatus('Location active');
+  }, [currentUser, refreshNotifications, refreshAuthorityIncidents]);
+
+  useEffect(() => {
+    if (!currentUser || !authService.getToken()) {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+      return undefined;
+    }
+
+    const socket = createSocket(API_ORIGIN, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      auth: { token: authService.getToken() }
+    });
+    socketRef.current = socket;
+
+    const handleCommunityAlert = () => refreshNotifications();
+    const handleResponseUpdate = () => {
+      refreshNotifications();
+      refreshMyReports();
+      refreshAuthorityIncidents();
+    };
+
+    socket.on('community-alert-created', handleCommunityAlert);
+    socket.on('notifications-synced', handleCommunityAlert);
+    socket.on('incident-response-updated', handleResponseUpdate);
+    socket.on('incident-created', refreshAuthorityIncidents);
+
+    return () => {
+      socket.off('community-alert-created', handleCommunityAlert);
+      socket.off('notifications-synced', handleCommunityAlert);
+      socket.off('incident-response-updated', handleResponseUpdate);
+      socket.off('incident-created', refreshAuthorityIncidents);
+      socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
+    };
+  }, [currentUser, refreshNotifications, refreshMyReports, refreshAuthorityIncidents]);
 
   // AUTOMATIC ALLOTMENT ON INCIDENT SELECTION OR CHANGE
   const autoAllotNearestUnitsForIncident = (targetIncident) => {
@@ -272,9 +481,14 @@ export const StateProvider = ({ children }) => {
       setSelectedIncidentId(newIncident.id);
 
       const allotments = autoAllotNearestUnitsForIncident(newIncident);
+      const warning = newIncident.communityWarning;
       addToast(
-        '🚨 Emergency Report Stored',
-        `${newIncident.id}: saved to MongoDB with priority ${newIncident.priorityScore}/100. Nearest response units are being matched.`,
+        newIncident.fusion?.mergedWithExistingIncident
+          ? '✅ Report Verified an Existing Incident'
+          : '🚨 Emergency Report Stored',
+        warning
+          ? `${warning.recipientsNotified} nearby user(s) warned within ${warning.radiusKm} km. Incident confidence: ${newIncident.fusion?.confidenceScore || newIncident.confidenceScore}%.`
+          : `${newIncident.id}: saved to MongoDB with priority ${newIncident.priorityScore}/100.`,
         'critical'
       );
 
@@ -287,7 +501,7 @@ export const StateProvider = ({ children }) => {
   };
 
   // Assign Rescue Team (Fire Station / ODRAF)
-  const assignResourceToIncident = (incidentId, resourceId) => {
+  const assignResourceToIncident = async (incidentId, resourceId) => {
     setIncidents(prev => prev.map(inc => {
       if (inc.id === incidentId) {
         return {
@@ -313,6 +527,24 @@ export const StateProvider = ({ children }) => {
     const inc = incidents.find(i => i.id === incidentId);
     const res = resources.find(r => r.id === resourceId);
 
+    if (inc?.databaseBacked) {
+      try {
+        const updatedIncident = await reportService.updateResponderStatus(incidentId, {
+          responderStatus: 'ASSIGNED',
+          resourceId,
+          resourceName: res?.name || resourceId,
+          etaMinutes: 6,
+          lat: res?.location?.lat,
+          lng: res?.location?.lng
+        });
+        setIncidents(previous => previous.map(item => (
+          item.id === incidentId ? { ...item, ...updatedIncident } : item
+        )));
+      } catch (error) {
+        addToast('Database Dispatch Update Failed', error.message, 'alert');
+      }
+    }
+
     if (res && inc) {
       setRouteOrigin({
         id: res.id,
@@ -335,6 +567,29 @@ export const StateProvider = ({ children }) => {
       `${res?.name || resourceId} assigned to ${incidentId}. ETA ~6 mins.`,
       "success"
     );
+  };
+
+  const updateIncidentResponse = async (incidentId, responseUpdate) => {
+    try {
+      const updatedIncident = await reportService.updateResponderStatus(incidentId, responseUpdate);
+      setIncidents(previous => previous.map(incident => (
+        incident.id === incidentId ? { ...incident, ...updatedIncident } : incident
+      )));
+      setMyIncidents(previous => previous.map(incident => (
+        incident.clusterId === incidentId || incident.id === incidentId
+          ? { ...incident, ...updatedIncident, id: incident.id }
+          : incident
+      )));
+      addToast(
+        'Live Response Updated',
+        `${incidentId}: ${updatedIncident.responderStatus.replaceAll('_', ' ')}${updatedIncident.etaMinutes !== null && updatedIncident.etaMinutes !== undefined ? ` · ETA ${updatedIncident.etaMinutes} min` : ''}`,
+        'success'
+      );
+      return updatedIncident;
+    } catch (error) {
+      addToast('Response Update Failed', error.message, 'alert');
+      throw error;
+    }
   };
 
   // Activate School Shelter & Notify Authorized Emergency Contacts
@@ -451,7 +706,7 @@ export const StateProvider = ({ children }) => {
   };
 
   // Simulate New Alert
-  const simulateNewAlert = () => {
+  const simulateNewAlert = async () => {
     const newAlertId = `ALERT-OD-${904 + alerts.length}`;
     const newAlert = {
       id: newAlertId,
@@ -470,15 +725,39 @@ export const StateProvider = ({ children }) => {
       ]
     };
 
-    setAlerts(prev => [newAlert, ...prev]);
-    setIncidents(prev => prev.map(inc => {
-      if (inc.status === 'UNASSIGNED') {
-        return { ...inc, priorityScore: Math.min(99, inc.priorityScore + 8) };
-      }
-      return inc;
-    }));
+    try {
+      const published = await notificationService.publish({
+        source: 'IMD',
+        type: 'CYCLONE',
+        severity: 'CRITICAL',
+        title: newAlert.title,
+        message: 'Critical cyclone and flash-flood warning for Bhubaneswar. Move indoors or to the nearest cyclone shelter and avoid flooded roads.',
+        locationName: 'Bhubaneswar Metropolitan Region',
+        district: 'Khordha',
+        lat: 20.2961,
+        lng: 85.8245,
+        radiusKm: 15
+      });
 
-    addToast("⚠ OFFICIAL IMD RED CYCLONE ALERT", newAlert.title, "alert");
+      setAlerts(prev => [{
+        ...newAlert,
+        databaseId: published.alert.id,
+        recipientsNotified: published.recipientsNotified
+      }, ...prev]);
+      setIncidents(prev => prev.map(inc => (
+        inc.status === 'UNASSIGNED'
+          ? { ...inc, priorityScore: Math.min(99, inc.priorityScore + 8) }
+          : inc
+      )));
+
+      addToast(
+        '⚠ OFFICIAL IMD RED CYCLONE ALERT',
+        `${published.recipientsNotified} nearby registered user(s) notified and the alert was stored in MongoDB.`,
+        'alert'
+      );
+    } catch (error) {
+      addToast('Official Alert Broadcast Failed', error.message, 'alert');
+    }
   };
 
   // Convert SMS report into active incident
@@ -678,6 +957,7 @@ export const StateProvider = ({ children }) => {
         removeToast,
         addCitizenReport,
         assignResourceToIncident,
+        updateIncidentResponse,
         activateSchoolShelter,
         updateStaffDutyStatus,
         allocateReliefSupplies,
@@ -693,6 +973,16 @@ export const StateProvider = ({ children }) => {
         runDemoMode,
         currentUser,
         setCurrentUser,
+        notifications,
+        unreadNotificationCount,
+        refreshNotifications,
+        markNotificationRead,
+        markAllNotificationsRead,
+        nearbyAlertsEnabled,
+        alertLocationStatus,
+        notificationPermission,
+        enableNearbyAlerts,
+        refreshAuthorityIncidents,
         // Route Optimization Exports
         routeOrigin,
         setRouteOrigin,

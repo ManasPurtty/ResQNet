@@ -195,6 +195,9 @@ export const ReportEmergency = () => {
                 </select>
               </div>
             </div>
+            <div className="rounded-xl border border-blue-900/70 bg-blue-950/30 px-3 py-2 text-[11px] leading-relaxed text-blue-200">
+              Your report location will also become your alert area. If this incident threatens nearby people, ResQNet will store a community warning in MongoDB and notify registered users inside the safety radius.
+            </div>
           </div>
 
           {/* STEP 2: EMERGENCY TYPE */}

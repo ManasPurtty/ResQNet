@@ -19,7 +19,9 @@ import {
   Building2,
   School,
   Phone,
-  Clock
+  Clock,
+  BellRing,
+  Users
 } from 'lucide-react';
 
 export const ReportSuccess = () => {
@@ -83,6 +85,36 @@ export const ReportSuccess = () => {
               </span>
             </div>
           </div>
+
+          {incident.communityWarning && (
+            <div className="rounded-2xl border border-red-700 bg-gradient-to-r from-red-950/70 to-orange-950/60 p-4 text-left shadow-xl">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/40 bg-red-600/20">
+                  <BellRing className="h-5 w-5 animate-pulse text-red-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-red-200">Nearby community warned</span>
+                    <span className="rounded bg-red-700 px-2 py-0.5 text-[10px] font-bold text-white">
+                      {incident.communityWarning.radiusKm} KM RADIUS
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-gray-200">
+                    {incident.communityWarning.alert?.message}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-3 text-[11px] font-mono text-red-200">
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" />
+                      {incident.communityWarning.recipientsNotified} registered nearby user(s) notified
+                    </span>
+                    {incident.fusion?.mergedWithExistingIncident && (
+                      <span>✓ Merged into verified incident {incident.fusion.clusterId}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* USER'S DESIGNATED NEARBY EVACUATION SHELTER (GOVERNMENT SCHOOL) */}
           {nearestSchool && (

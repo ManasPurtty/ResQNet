@@ -27,7 +27,9 @@ import {
   Navigation,
   Flame,
   Building2,
-  School
+  School,
+  Radio,
+  Loader2
 } from 'lucide-react';
 
 export const IncidentDetailPanel = () => {
@@ -37,6 +39,7 @@ export const IncidentDetailPanel = () => {
     shelters,
     selectedIncidentId,
     assignResourceToIncident,
+    updateIncidentResponse,
     activateSchoolShelter,
     updateStaffDutyStatus,
     allocateReliefSupplies,
@@ -48,6 +51,7 @@ export const IncidentDetailPanel = () => {
 
   const [showReliefDrawer, setShowReliefDrawer] = useState(false);
   const [isNotifyingStaff, setIsNotifyingStaff] = useState(false);
+  const [responseUpdating, setResponseUpdating] = useState('');
 
   const incident = incidents.find(i => i.id === selectedIncidentId) || incidents[0];
 
@@ -103,6 +107,23 @@ export const IncidentDetailPanel = () => {
       setIsNotifyingStaff(false);
       activateSchoolShelter(incident.id, shelterId, incident.peopleAffected || 35);
     }, 600);
+  };
+
+  const handleResponseStatus = async responderStatus => {
+    setResponseUpdating(responderStatus);
+    try {
+      await updateIncidentResponse(incident.id, {
+        responderStatus,
+        resourceId: incident.assignedResourceId,
+        resourceName: assignedTeam?.name || incident.assignedResourceName,
+        shelterId: incident.assignedShelterId,
+        etaMinutes: responderStatus === 'EN_ROUTE' ? 6 : responderStatus === 'ARRIVED' ? 0 : incident.etaMinutes
+      });
+    } catch {
+      // The shared state already displays the API error as a toast.
+    } finally {
+      setResponseUpdating('');
+    }
   };
 
   return (
@@ -218,6 +239,41 @@ export const IncidentDetailPanel = () => {
             )}
           </div>
         </div>
+
+        {incident.databaseBacked && (
+          <div className="space-y-3 rounded-xl border border-violet-800/80 bg-violet-950/25 p-3.5">
+            <div className="flex items-center justify-between border-b border-violet-900/60 pb-2">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-violet-200">
+                <Radio className="h-4 w-4 animate-pulse text-violet-400" /> Live MongoDB responder tracking
+              </div>
+              <span className="rounded bg-violet-950 px-2 py-0.5 text-[10px] font-mono font-bold text-violet-300">
+                {(incident.responderStatus || 'AWAITING_ASSIGNMENT').replaceAll('_', ' ')}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {['ASSIGNED', 'EN_ROUTE', 'ARRIVED', 'RESCUE_IN_PROGRESS', 'COMPLETED'].map(status => (
+                <button
+                  type="button"
+                  key={status}
+                  onClick={() => handleResponseStatus(status)}
+                  disabled={Boolean(responseUpdating) || incident.responderStatus === status}
+                  className={`rounded-lg border px-2 py-2 text-[10px] font-bold transition-colors ${
+                    incident.responderStatus === status
+                      ? 'border-emerald-700 bg-emerald-950 text-emerald-300'
+                      : 'border-violet-800 bg-[#151e32] text-violet-200 hover:bg-violet-900/60 disabled:cursor-wait disabled:opacity-50'
+                  }`}
+                >
+                  {responseUpdating === status
+                    ? <Loader2 className="mx-auto h-3.5 w-3.5 animate-spin" />
+                    : status.replaceAll('_', ' ')}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] leading-relaxed text-gray-400">
+              Every update is saved in MongoDB, sent to all reporters, and appears live in their My Reports timeline.
+            </p>
+          </div>
+        )}
 
         {/* Incident Summary Metadata & Image */}
         <div className="bg-[#151e32] border border-gray-800 rounded-xl p-3 space-y-3">

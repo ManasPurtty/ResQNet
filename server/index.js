@@ -3,12 +3,15 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
-import { connectDB } from './config/db.js';
+import jwt from 'jsonwebtoken';
+import { connectDB, getDbStatus, inMemoryUsers } from './config/db.js';
 import { seedDemoAdmin } from './config/seedDemoAdmin.js';
+import { User } from './models/User.js';
 import apiRouter from './routes/api.js';
 import routeOptimizationRouter from './routes/routeOptimization.js';
 import authRouter from './routes/auth.js';
 import reportsRouter from './routes/reports.js';
+import communityAlertsRouter from './routes/communityAlerts.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +19,8 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
   'https://resqnet-1-kaxz.onrender.com',
   ...(process.env.CLIENT_URLS || process.env.CLIENT_URL || '')
     .split(',')
@@ -51,8 +56,31 @@ const io = new Server(server, {
   }
 });
 
+const socketJwtSecret = process.env.JWT_SECRET || 'resqnet_super_secret_jwt_key_2026_odisha';
+
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error('Authentication required'));
+
+    const decoded = jwt.verify(token, socketJwtSecret);
+    const user = getDbStatus()
+      ? await User.findById(decoded.id).select('_id role')
+      : inMemoryUsers.find(candidate => String(candidate._id) === String(decoded.id));
+
+    if (!user) return next(new Error('User not found'));
+    socket.userId = String(user._id);
+    socket.userRole = user.role;
+    next();
+  } catch {
+    next(new Error('Invalid or expired authentication token'));
+  }
+});
+
 // Socket.IO Events
 io.on('connection', (socket) => {
+  socket.join(`user:${socket.userId}`);
+  socket.join(`role:${socket.userRole}`);
   console.log(`[ResQNet Real-Time] Command Center client connected: ${socket.id}`);
 
   socket.on('join-eoc', (room) => {
@@ -94,6 +122,7 @@ app.get('/health', (req, res) => {
 // Register API, Auth, and Route Optimization Routers
 app.use('/api/auth', authRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/community-alerts', communityAlertsRouter);
 app.use('/api', apiRouter);
 app.use('/api/routes', routeOptimizationRouter);
 

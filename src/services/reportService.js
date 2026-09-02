@@ -37,11 +37,28 @@ export const reportService = {
       method: 'POST',
       body: JSON.stringify(reportData)
     });
-    return data.incident;
+    return {
+      ...data.incident,
+      fusion: data.fusion,
+      communityWarning: data.communityWarning
+    };
   },
 
   async getMine() {
     const data = await authenticatedRequest('/mine');
     return data.reports || [];
+  },
+
+  async getIncidentClusters() {
+    const data = await authenticatedRequest('/clusters');
+    return data.incidents || [];
+  },
+
+  async updateResponderStatus(clusterId, update) {
+    const data = await authenticatedRequest(`/clusters/${encodeURIComponent(clusterId)}/response`, {
+      method: 'PATCH',
+      body: JSON.stringify(update)
+    });
+    return data.incident;
   }
 };

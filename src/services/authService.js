@@ -109,6 +109,38 @@ export const authService = {
     }
   },
 
+  // Opt in to geo-targeted emergency alerts using the browser's current location.
+  async updateLocation(location) {
+    const token = this.getToken();
+    if (!token) throw new Error('Please log in to enable nearby emergency alerts.');
+
+    const response = await fetch(`${AUTH_API_URL}/location`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(location)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(data.message || 'Unable to save your alert location');
+      error.status = response.status;
+      throw error;
+    }
+
+    const currentUser = this.getUser();
+    if (currentUser) {
+      this.setSession(token, {
+        ...currentUser,
+        lastKnownLocation: data.location,
+        notificationPreferences: data.notificationPreferences || currentUser.notificationPreferences
+      });
+    }
+    return data;
+  },
+
   // Check backend and database connection status
   async getDbStatus() {
     try {

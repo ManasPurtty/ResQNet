@@ -27,6 +27,12 @@ const IncidentReportSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  clusterId: {
+    type: String,
+    required: true,
+    index: true
+  },
+  isCorroboratingReport: { type: Boolean, default: false },
   title: { type: String, required: true, trim: true },
   type: {
     type: String,

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, AlertCircle, FileText, Lock, LogOut, UserCircle2 } from 'lucide-react';
 import { useAppState } from '../context/StateContext';
 import { authService } from '../services/authService';
+import { NotificationCenter } from './NotificationCenter';
 
 export const CitizenNavbar = () => {
   const location = useLocation();
@@ -40,6 +41,7 @@ export const CitizenNavbar = () => {
 
         {/* Links */}
         <div className="flex items-center gap-3">
+          {currentUser && <NotificationCenter />}
           <Link
             to="/my-reports"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${

@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { inMemoryUsers, getDbStatus } from '../config/db.js';
+import { syncNotificationsForUser } from '../services/communityAlertService.js';
+import { geoPoint, isValidCoordinate } from '../utils/geo.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'resqnet_super_secret_jwt_key_2026_odisha';
@@ -253,9 +255,70 @@ router.get('/me', protect, (req, res) => {
       phone: req.user.phone,
       role: req.user.role,
       district: req.user.district,
-      badgeNumber: req.user.badgeNumber
+      badgeNumber: req.user.badgeNumber,
+      lastKnownLocation: req.user.lastKnownLocation
+        ? {
+            lat: req.user.lastKnownLocation.coordinates[1],
+            lng: req.user.lastKnownLocation.coordinates[0],
+            accuracyMeters: req.user.lastKnownLocation.accuracyMeters,
+            updatedAt: req.user.lastKnownLocation.updatedAt
+          }
+        : null,
+      notificationPreferences: req.user.notificationPreferences
     }
   });
+});
+
+// Store the user's opt-in location so active nearby warnings can be delivered.
+router.patch('/location', protect, async (req, res) => {
+  try {
+    const latitude = Number(req.body.lat);
+    const longitude = Number(req.body.lng);
+    const accuracyMeters = Number(req.body.accuracyMeters);
+    const alertRadiusKm = Number(req.body.alertRadiusKm);
+
+    if (!isValidCoordinate(latitude, longitude)) {
+      return res.status(400).json({ success: false, message: 'Valid latitude and longitude are required' });
+    }
+
+    if (!getDbStatus()) {
+      req.user.lastKnownLocation = {
+        ...geoPoint(latitude, longitude),
+        accuracyMeters: Number.isFinite(accuracyMeters) ? Math.max(0, accuracyMeters) : null,
+        updatedAt: new Date()
+      };
+      return res.json({ success: true, location: req.user.lastKnownLocation, notificationsSynced: 0 });
+    }
+
+    const user = await User.findById(req.user._id);
+    user.lastKnownLocation = {
+      ...geoPoint(latitude, longitude),
+      accuracyMeters: Number.isFinite(accuracyMeters) ? Math.max(0, accuracyMeters) : null,
+      updatedAt: new Date()
+    };
+
+    if (Number.isFinite(alertRadiusKm)) {
+      user.notificationPreferences.alertRadiusKm = Math.min(50, Math.max(1, alertRadiusKm));
+    }
+
+    await user.save();
+    const notificationsSynced = await syncNotificationsForUser(user, req.io);
+
+    res.json({
+      success: true,
+      location: {
+        lat: latitude,
+        lng: longitude,
+        accuracyMeters: user.lastKnownLocation.accuracyMeters,
+        updatedAt: user.lastKnownLocation.updatedAt
+      },
+      notificationPreferences: user.notificationPreferences,
+      notificationsSynced
+    });
+  } catch (error) {
+    console.error('Update user location error:', error);
+    res.status(500).json({ success: false, message: 'Unable to save your alert location' });
+  }
 });
 
 // ===================================================

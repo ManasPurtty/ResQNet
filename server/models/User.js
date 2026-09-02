@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+const GeoPointSchema = new mongoose.Schema({
+  type: { type: String, enum: ['Point'], required: true, default: 'Point' },
+  coordinates: {
+    type: [Number],
+    required: true,
+    validate: coordinates => coordinates.length === 2
+  },
+  accuracyMeters: { type: Number, default: null, min: 0 },
+  updatedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -39,6 +50,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  lastKnownLocation: {
+    type: GeoPointSchema,
+    default: undefined
+  },
+  notificationPreferences: {
+    alertRadiusKm: { type: Number, default: 15, min: 1, max: 50 },
+    browserAlerts: { type: Boolean, default: true }
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -53,6 +72,8 @@ UserSchema.pre('save', async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+UserSchema.index({ lastKnownLocation: '2dsphere' });
 
 // Match entered password to hashed password in database
 UserSchema.methods.matchPassword = async function (enteredPassword) {

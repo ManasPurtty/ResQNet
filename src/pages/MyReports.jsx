@@ -16,7 +16,8 @@ import {
   PlusCircle,
   ArrowRight,
   Phone,
-  RefreshCw
+  RefreshCw,
+  Radio
 } from 'lucide-react';
 
 export const MyReports = () => {
@@ -148,6 +149,11 @@ export const MyReports = () => {
                       </div>
 
                       <div className="flex items-center gap-2">
+                        {inc.reportCount > 1 && (
+                          <span className="bg-violet-950 text-violet-300 border border-violet-800 text-xs font-mono font-bold px-2.5 py-0.5 rounded">
+                            VERIFIED BY {inc.reportCount} REPORTS
+                          </span>
+                        )}
                         <span className="bg-red-950 text-red-300 border border-red-800 text-xs font-mono font-bold px-2.5 py-0.5 rounded">
                           {inc.severity}
                         </span>
@@ -171,7 +177,7 @@ export const MyReports = () => {
                             </div>
                           </div>
                           <span className="font-mono text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 shrink-0">
-                            EN ROUTE
+                            {(inc.responderStatus || 'EN_ROUTE').replaceAll('_', ' ')}
                           </span>
                         </div>
                       ) : (
@@ -203,6 +209,18 @@ export const MyReports = () => {
                         </div>
                       )}
                     </div>
+
+                    {inc.responderStatus && inc.responderStatus !== 'AWAITING_ASSIGNMENT' && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-700/70 bg-blue-950/40 px-4 py-2.5 text-xs text-blue-100">
+                        <span className="flex items-center gap-2 font-bold">
+                          <Radio className="h-4 w-4 animate-pulse text-blue-400" />
+                          Live responder status: {inc.responderStatus.replaceAll('_', ' ')}
+                        </span>
+                        {inc.etaMinutes !== null && inc.etaMinutes !== undefined && (
+                          <span className="font-mono text-emerald-300">ETA {inc.etaMinutes} minutes</span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Timeline Visualization */}
                     <div className="space-y-3 pt-2">
